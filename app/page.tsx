@@ -13,16 +13,18 @@ export default function Home() {
     <>
       <WeatherBackground conditions={weatherConditions} />
       <main className="min-h-screen flex flex-col items-center px-4 py-12 relative">
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-mf-blue to-blue-300 bg-clip-text text-transparent text-glow mb-3">
-            Ski Wax Guide
-          </h1>
-          <p className="text-lg tracking-wide text-mf-blue/60 max-w-md mx-auto">
-            Get the right wax for today&#39;s conditions. Auto-detect your local
-            temperature or enter it manually.
-          </p>
+        <div className="w-full max-w-xl mx-auto bg-black/40 backdrop-blur-md rounded-3xl p-8 border border-white/10 shadow-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold tracking-tight text-white text-glow mb-3">
+              Ski Wax Guide
+            </h1>
+            <p className="text-lg tracking-wide text-white/60 max-w-md mx-auto">
+              Get the right wax for today&#39;s conditions. Auto-detect your local
+              temperature or enter it manually.
+            </p>
+          </div>
+          <WaxRecommender onWeatherChange={setWeatherConditions} />
         </div>
-        <WaxRecommender onWeatherChange={setWeatherConditions} />
       </main>
     </>
   );

@@ -18,6 +18,7 @@ import {
   type WeatherConditions,
   calcEffectiveTemp,
 } from "@/lib/weatherTypes";
+import { resorts, type SkiResort } from "@/lib/resorts";
 import WeatherWidget from "./WeatherWidget";
 
 interface WaxRecommenderProps {
@@ -42,11 +43,48 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
   const [locationName, setLocationName] = useState("");
   const [weatherConditions, setWeatherConditions] =
     useState<WeatherConditions | null>(null);
+  const [resortSearch, setResortSearch] = useState("");
+  const [showResortDropdown, setShowResortDropdown] = useState(false);
 
   function applyResults(tempF: number, conditions?: WeatherConditions) {
     const effectiveF = conditions ? calcEffectiveTemp(conditions) : tempF;
     setRecommendation(getWaxRecommendation(effectiveF, conditions));
     setQuiver(getQuiverRecommendation(effectiveF));
+  }
+
+  async function fetchWeatherByCoords(lat: number, lon: number, name: string) {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&wind_speed_unit=mph&temperature_unit=fahrenheit`
+    );
+    if (!res.ok) throw new Error("Weather API request failed");
+    const data = await res.json();
+    const current = data.current;
+
+    const tempF: number = current.temperature_2m;
+    const tempC = fahrenheitToCelsius(tempF);
+
+    const conditions: WeatherConditions = {
+      tempF,
+      tempC,
+      windSpeedMph: current.wind_speed_10m,
+      windDirection: current.wind_direction_10m,
+      cloudCover: current.cloud_cover,
+      weatherCode: current.weather_code,
+      isDay: current.is_day === 1,
+      precipitation: current.precipitation,
+      humidity: current.relative_humidity_2m,
+    };
+
+    setWeatherConditions(conditions);
+    onWeatherChange?.(conditions);
+    setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
+    applyResults(tempF, conditions);
+    setTempInput(
+      unit === "F"
+        ? Math.round(tempF).toString()
+        : Math.round(tempC).toString()
+    );
+    setLocationName(name);
   }
 
   async function handleAutoDetect() {
@@ -65,38 +103,9 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       async (position) => {
         const { latitude, longitude } = position.coords;
         try {
-          const res = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&wind_speed_unit=mph&temperature_unit=fahrenheit`
-          );
-          if (!res.ok) throw new Error("Weather API request failed");
-          const data = await res.json();
-          const current = data.current;
-
-          const tempF: number = current.temperature_2m;
-          const tempC = fahrenheitToCelsius(tempF);
-
-          const conditions: WeatherConditions = {
-            tempF,
-            tempC,
-            windSpeedMph: current.wind_speed_10m,
-            windDirection: current.wind_direction_10m,
-            cloudCover: current.cloud_cover,
-            weatherCode: current.weather_code,
-            isDay: current.is_day === 1,
-            precipitation: current.precipitation,
-            humidity: current.relative_humidity_2m,
-          };
-
-          setWeatherConditions(conditions);
-          onWeatherChange?.(conditions);
-          setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
-          applyResults(tempF, conditions);
-          setTempInput(
-            unit === "F"
-              ? Math.round(tempF).toString()
-              : Math.round(tempC).toString()
-          );
-          setLocationName(
+          await fetchWeatherByCoords(
+            latitude,
+            longitude,
             `${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°W`
           );
         } catch {
@@ -112,6 +121,23 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         setLoading(false);
       }
     );
+  }
+
+  async function handleResortSelect(resort: SkiResort) {
+    setResortSearch(resort.name);
+    setShowResortDropdown(false);
+    setError("");
+    setLoading(true);
+    setLocationName("");
+    setWeatherConditions(null);
+
+    try {
+      await fetchWeatherByCoords(resort.lat, resort.lon, resort.name);
+    } catch {
+      setError(`Failed to fetch weather for ${resort.name}. Please try again.`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleManualSubmit(e: React.FormEvent) {
@@ -150,6 +176,77 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         >
           {loading ? "Detecting location..." : "Use My Location"}
         </button>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-mf-blue/30" />
+        <span className="text-mf-blue/60 text-sm font-medium">or</span>
+        <div className="flex-1 h-px bg-mf-blue/30" />
+      </div>
+
+      {/* Resort picker section */}
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover relative z-30">
+        <h2 className="text-lg font-semibold text-white mb-3">
+          Pick a Resort
+        </h2>
+        <div className="relative">
+          <input
+            type="text"
+            value={resortSearch}
+            onChange={(e) => {
+              setResortSearch(e.target.value);
+              setShowResortDropdown(true);
+            }}
+            onFocus={() => setShowResortDropdown(true)}
+            placeholder="Search resorts..."
+            className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+          />
+          {showResortDropdown && (
+            <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-64 overflow-y-auto shadow-xl">
+              {(() => {
+                const query = resortSearch.toLowerCase();
+                const filtered = resorts.filter((r) =>
+                  r.name.toLowerCase().includes(query)
+                );
+                if (filtered.length === 0) {
+                  return (
+                    <div className="px-4 py-3 text-white/40 text-sm">
+                      No resorts found
+                    </div>
+                  );
+                }
+                const regions = [...new Set(filtered.map((r) => r.region))];
+                return regions.map((region) => (
+                  <div key={region}>
+                    <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
+                      {region}
+                    </div>
+                    {filtered
+                      .filter((r) => r.region === region)
+                      .map((resort) => (
+                        <button
+                          key={resort.name}
+                          type="button"
+                          onClick={() => handleResortSelect(resort)}
+                          className="w-full text-left px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                        >
+                          {resort.name}
+                        </button>
+                      ))}
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+        </div>
+        {/* Click outside to close */}
+        {showResortDropdown && (
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setShowResortDropdown(false)}
+          />
+        )}
       </div>
 
       {/* Divider */}
