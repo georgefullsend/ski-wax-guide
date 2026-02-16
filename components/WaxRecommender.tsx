@@ -20,7 +20,11 @@ import {
 } from "@/lib/weatherTypes";
 import WeatherWidget from "./WeatherWidget";
 
-export default function WaxRecommender() {
+interface WaxRecommenderProps {
+  onWeatherChange?: (conditions: WeatherConditions | null) => void;
+}
+
+export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps) {
   const [tempInput, setTempInput] = useState("");
   const [unit, setUnit] = useState<"F" | "C">("F");
   const [recommendation, setRecommendation] =
@@ -84,6 +88,7 @@ export default function WaxRecommender() {
           };
 
           setWeatherConditions(conditions);
+          onWeatherChange?.(conditions);
           setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
           applyResults(tempF, conditions);
           setTempInput(
@@ -113,6 +118,7 @@ export default function WaxRecommender() {
     e.preventDefault();
     setError("");
     setWeatherConditions(null);
+    onWeatherChange?.(null);
 
     const value = parseFloat(tempInput);
     if (isNaN(value)) {
