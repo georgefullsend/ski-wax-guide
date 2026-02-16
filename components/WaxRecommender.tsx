@@ -133,14 +133,14 @@ export default function WaxRecommender() {
   return (
     <div className="w-full max-w-xl mx-auto space-y-6">
       {/* Auto-detect section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover">
         <h2 className="text-lg font-semibold text-white mb-3">
           Auto-Detect Weather
         </h2>
         <button
           onClick={handleAutoDetect}
           disabled={loading}
-          className="w-full bg-mf-blue hover:bg-mf-blue-dark disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3 px-6 rounded-xl transition-colors"
+          className={`w-full bg-mf-blue hover:bg-mf-blue-dark disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3 px-6 rounded-xl transition-all ${loading ? "animate-pulse" : ""}`}
         >
           {loading ? "Detecting location..." : "Use My Location"}
         </button>
@@ -154,7 +154,7 @@ export default function WaxRecommender() {
       </div>
 
       {/* Manual input section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover">
         <h2 className="text-lg font-semibold text-white mb-3">
           Enter Temperature
         </h2>
@@ -196,84 +196,9 @@ export default function WaxRecommender() {
         <WeatherWidget conditions={weatherConditions} />
       )}
 
-      {/* Quiver Selector */}
-      {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">
-              Quiver Selector
-            </h2>
-            <span className="text-sm text-white/50">{quiver.condition}</span>
-          </div>
-
-          <p className="text-white/70 text-sm">{quiver.description}</p>
-
-          {/* Ski / Snowboard toggle */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDiscipline("ski")}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-                discipline === "ski"
-                  ? "bg-mf-blue text-white"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
-              }`}
-            >
-              Skis
-            </button>
-            <button
-              onClick={() => setDiscipline("snowboard")}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
-                discipline === "snowboard"
-                  ? "bg-mf-blue text-white"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
-              }`}
-            >
-              Snowboards
-            </button>
-          </div>
-
-          {/* Quiver options */}
-          <div className="space-y-3">
-            {quiverOptions.map((option) => (
-              <div
-                key={option.name}
-                className="bg-white/5 rounded-xl p-4 space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold text-sm">
-                    {option.name}
-                  </h3>
-                  <span className="text-mf-blue text-xs font-medium">
-                    {option.bestFor}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <div className="text-white/50">
-                    Length:{" "}
-                    <span className="text-white/80">{option.length}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Waist:{" "}
-                    <span className="text-white/80">{option.waistWidth}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Shape:{" "}
-                    <span className="text-white/80">{option.shape}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Camber:{" "}
-                    <span className="text-white/80">{option.camber}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Wax Result display */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-green/30 space-y-4">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-green/30 space-y-4 card-hover">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">
               Recommended Wax
@@ -329,9 +254,9 @@ export default function WaxRecommender() {
                   <button
                     key={range}
                     onClick={() => setProductRange(range)}
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                       productRange === range
-                        ? "bg-mf-green text-white"
+                        ? "bg-mf-green text-white ring-2 ring-mf-green/30 shadow-lg shadow-mf-green/10"
                         : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
                     }`}
                   >
@@ -361,6 +286,81 @@ export default function WaxRecommender() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Quiver Selector */}
+      {quiver && currentTemp && (
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 space-y-4 card-hover">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-white">
+              Quiver Selector
+            </h2>
+            <span className="text-sm text-white/50">{quiver.condition}</span>
+          </div>
+
+          <p className="text-white/70 text-sm">{quiver.description}</p>
+
+          {/* Ski / Snowboard toggle */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDiscipline("ski")}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+                discipline === "ski"
+                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
+                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+              }`}
+            >
+              Skis
+            </button>
+            <button
+              onClick={() => setDiscipline("snowboard")}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+                discipline === "snowboard"
+                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
+                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+              }`}
+            >
+              Snowboards
+            </button>
+          </div>
+
+          {/* Quiver options */}
+          <div className="space-y-3">
+            {quiverOptions.map((option) => (
+              <div
+                key={option.name}
+                className="bg-white/5 rounded-xl p-4 space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-white font-semibold text-sm">
+                    {option.name}
+                  </h3>
+                  <span className="text-mf-blue text-xs font-medium">
+                    {option.bestFor}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <div className="text-white/50">
+                    Length:{" "}
+                    <span className="text-white/80">{option.length}</span>
+                  </div>
+                  <div className="text-white/50">
+                    Waist:{" "}
+                    <span className="text-white/80">{option.waistWidth}</span>
+                  </div>
+                  <div className="text-white/50">
+                    Shape:{" "}
+                    <span className="text-white/80">{option.shape}</span>
+                  </div>
+                  <div className="text-white/50">
+                    Camber:{" "}
+                    <span className="text-white/80">{option.camber}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
