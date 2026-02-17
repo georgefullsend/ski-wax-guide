@@ -1,30 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import WaxRecommender from "@/components/WaxRecommender";
-import WeatherBackground from "@/components/WeatherBackground";
-import type { WeatherConditions } from "@/lib/weatherTypes";
 
 export default function Home() {
-  const [weatherConditions, setWeatherConditions] =
-    useState<WeatherConditions | null>(null);
-
   return (
-    <>
-      <WeatherBackground conditions={weatherConditions} />
-      <main className="min-h-screen flex flex-col items-center px-3 sm:px-4 py-6 sm:py-12 relative">
-        <div className="w-full max-w-xl mx-auto bg-black/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-white/10 shadow-2xl">
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white text-glow mb-2 sm:mb-3">
-              Ski Wax Guide
-            </h1>
-            <p className="text-sm sm:text-lg tracking-wide text-white/60 max-w-md mx-auto">
-              Maximize each run with the best wax for the conditions.
-            </p>
-          </div>
-          <WaxRecommender onWeatherChange={setWeatherConditions} />
+    <main className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-8 sm:py-16">
+      <div className="w-full max-w-lg mx-auto">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+            Ski Wax Guide
+          </h1>
+          <p className="text-sm text-ink-muted mt-1">
+            Wax recommendation for current conditions.
+          </p>
         </div>
-      </main>
-    </>
+        <WaxRecommender />
+      </div>
+    </main>
   );
 }

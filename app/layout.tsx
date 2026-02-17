@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm",
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Ski Wax Guide",
@@ -17,7 +24,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
-      <body className="min-h-screen antialiased overscroll-none">
+      <body className={`${dmSans.variable} min-h-screen antialiased overscroll-none bg-white`}>
         {children}
       </body>
     </html>

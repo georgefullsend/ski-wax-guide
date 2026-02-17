@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-mf-blue: #7B8EC8;
-  --color-mf-blue-dark: #5F72AC;
-  --color-mf-blue-darker: #4A5B8F;
-  --color-mf-green: #6A9E78;
-  --color-mf-green-dark: #548763;
-  --color-mf-green-darker: #42704F;
+  --color-ink: #1A1A1A;
+  --color-ink-light: #4A4A4A;
+  --color-ink-muted: #8A8A8A;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F7F7F7;
+  --color-border: #E5E5E5;
+  --color-border-strong: #D0D0D0;
 }
 
 html {
@@ -14,23 +15,11 @@ html {
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-dm), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* Card hover lift — disabled on touch devices to avoid sticky hover */
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-@media (hover: hover) {
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(123, 142, 200, 0.12);
-  }
 }
 
 /* Button press feedback */
@@ -56,63 +45,7 @@ button:active:not(:disabled) {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Heading glow */
-.text-glow {
-  text-shadow: 0 0 30px rgba(123, 142, 200, 0.3);
-}
-
-/* Weather background animations */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.9; }
-}
-.animate-twinkle {
-  animation: twinkle 3s ease-in-out infinite;
-}
-
-@keyframes sun-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.06); opacity: 1; }
-}
-.animate-sun-pulse {
-  animation: sun-pulse 4s ease-in-out infinite;
-}
-
-@keyframes cloud-drift {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(80vw); }
-}
-.animate-cloud-drift {
-  animation: cloud-drift 50s linear infinite;
-}
-
-@keyframes snowfall {
-  0% { transform: translateY(-5vh) translateX(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(105vh) translateX(20px); opacity: 0; }
-}
-.animate-snowfall {
-  animation: snowfall 5s linear infinite;
-}
-
-@keyframes rainfall {
-  0% { transform: translateY(-5vh); opacity: 0; }
-  10% { opacity: 0.6; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(105vh); opacity: 0; }
-}
-.animate-rainfall {
-  animation: rainfall 1s linear infinite;
-}
-
-@keyframes lightning-flash {
-  0%, 92%, 100% { background-color: rgba(255,255,255,0); }
-  94% { background-color: rgba(255,255,255,0.15); }
-  96% { background-color: rgba(255,255,255,0); }
-  97% { background-color: rgba(255,255,255,0.1); }
-  99% { background-color: rgba(255,255,255,0); }
-}
-.animate-lightning-flash {
-  animation: lightning-flash 6s ease-in-out infinite;
+/* iOS safe area bottom padding */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }

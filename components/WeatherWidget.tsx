@@ -26,67 +26,67 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
   const windLabel = getWindLabel(conditions.windSpeedMph);
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 card-hover">
-      <h2 className="text-base sm:text-lg font-semibold text-white">
+    <div className="border border-border rounded-lg p-4 space-y-3">
+      <h2 className="text-xs font-semibold text-ink-muted uppercase tracking-wider">
         {isTomorrow ? "Tomorrow\u2019s Forecast" : "Current Conditions"}
       </h2>
 
       {/* Main condition row */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-2xl sm:text-3xl">{icon}</span>
-          <span className="text-white font-medium text-sm sm:text-base">{label}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{icon}</span>
+          <span className="text-ink font-medium text-sm">{label}</span>
         </div>
         {isTomorrow && tempLow != null ? (
           <div className="text-right">
-            <span className="text-xl sm:text-2xl font-bold text-white">
+            <span className="text-lg font-bold text-ink">
               {Math.round(conditions.tempF)}°F
             </span>
-            <span className="text-white/50 text-xs sm:text-sm block">
+            <span className="text-ink-muted text-xs block">
               Low: {tempLow}°F
             </span>
           </div>
         ) : (
-          <span className="text-xl sm:text-2xl font-bold text-white">
+          <span className="text-lg font-bold text-ink">
             {Math.round(conditions.tempF)}°F
           </span>
         )}
       </div>
 
       {/* Details grid */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-sm">
-        <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
-          <span className="text-white/50 text-xs sm:text-sm">💨 Wind: </span>
-          <span className="text-white/90 text-xs sm:text-sm">
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div className="bg-surface-alt rounded-lg px-3 py-2">
+          <span className="text-ink-muted text-xs">Wind: </span>
+          <span className="text-ink-light text-xs">
             {Math.round(conditions.windSpeedMph)} mph {windDir}
           </span>
-          <span className="text-white/40 text-xs block">{windLabel}</span>
+          <span className="text-ink-muted/60 text-xs block">{windLabel}</span>
         </div>
-        <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
-          <span className="text-white/50 text-xs sm:text-sm">❄️ Precip: </span>
-          <span className="text-white/90 text-xs sm:text-sm">{conditions.precipitation} mm</span>
+        <div className="bg-surface-alt rounded-lg px-3 py-2">
+          <span className="text-ink-muted text-xs">Precip: </span>
+          <span className="text-ink-light text-xs">{conditions.precipitation} mm</span>
         </div>
-        <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
-          <span className="text-white/50 text-xs sm:text-sm">☁️ Cloud: </span>
-          <span className="text-white/90 text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.cloudCover}%`}</span>
+        <div className="bg-surface-alt rounded-lg px-3 py-2">
+          <span className="text-ink-muted text-xs">Cloud: </span>
+          <span className="text-ink-light text-xs">{isTomorrow ? "\u2014" : `${conditions.cloudCover}%`}</span>
         </div>
-        <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
-          <span className="text-white/50 text-xs sm:text-sm">💧 Humid: </span>
-          <span className="text-white/90 text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.humidity}%`}</span>
+        <div className="bg-surface-alt rounded-lg px-3 py-2">
+          <span className="text-ink-muted text-xs">Humid: </span>
+          <span className="text-ink-light text-xs">{isTomorrow ? "\u2014" : `${conditions.humidity}%`}</span>
         </div>
       </div>
 
       {/* Effective temp */}
-      <div className="bg-mf-blue/15 rounded-xl p-3 space-y-1">
+      <div className="bg-surface-alt rounded-lg p-3 space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-white/70 text-xs sm:text-sm font-medium">
+          <span className="text-ink-muted text-xs font-medium">
             Snow Surface Estimate
           </span>
-          <span className="text-white font-bold text-sm sm:text-base flex-shrink-0">
+          <span className="text-ink font-bold text-sm flex-shrink-0">
             {effectiveTempF}°F / {effectiveTempC}°C
           </span>
         </div>
-        <p className="text-white/50 text-xs">{explanation}</p>
+        <p className="text-ink-muted/70 text-xs">{explanation}</p>
       </div>
     </div>
   );
