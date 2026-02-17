@@ -19,8 +19,7 @@ export default function Home() {
               Ski Wax Guide
             </h1>
             <p className="text-sm sm:text-lg tracking-wide text-white/60 max-w-md mx-auto">
-              Get the right wax for today&#39;s conditions. Auto-detect your local
-              temperature or enter it manually.
+              Maximize each run with the best wax for the conditions.
             </p>
           </div>
           <WaxRecommender onWeatherChange={setWeatherConditions} />
