@@ -252,7 +252,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       {inputCollapsed && recommendation ? (
         <button
           onClick={() => setInputCollapsed(false)}
-          className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-5 flex items-center justify-between border border-mf-blue/30 card-hover text-left"
+          className="w-full bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-mf-blue/30 liquid-card card-hover text-left"
         >
           <div className="flex items-center gap-2.5">
             {activeConditions && (
@@ -270,14 +270,14 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       ) : (
         <>
           {/* Auto-detect section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Auto-Detect Weather
             </h2>
             <button
               onClick={handleAutoDetect}
               disabled={loading}
-              className={`w-full bg-mf-blue hover:bg-mf-blue-dark active:bg-mf-blue-darker disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-all min-h-[48px] ${loading ? "animate-pulse" : ""}`}
+              className={`w-full bg-mf-blue hover:bg-mf-blue-dark active:bg-mf-blue-darker disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3.5 sm:py-3 px-6 rounded-2xl transition-all min-h-[48px] liquid-btn ${loading ? "animate-pulse" : ""}`}
             >
               {loading ? "Detecting location..." : "Use My Location"}
             </button>
@@ -291,7 +291,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Resort picker section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover relative z-30">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover relative z-30">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Pick a Resort
             </h2>
@@ -404,7 +404,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Manual input section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Enter Temperature
             </h2>
@@ -428,7 +428,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
               </div>
               <button
                 type="submit"
-                className="w-full bg-mf-green hover:bg-mf-green-dark active:bg-mf-green-darker text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-colors min-h-[48px]"
+                className="w-full bg-mf-green hover:bg-mf-green-dark active:bg-mf-green-darker text-white font-medium py-3.5 sm:py-3 px-6 rounded-2xl transition-colors min-h-[48px] liquid-btn"
               >
                 Get Recommendation
               </button>
@@ -446,7 +446,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Wax Result display — HERO position, above weather */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Recommended Wax
@@ -502,7 +502,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                   <button
                     key={range}
                     onClick={() => setProductRange(range)}
-                    className={`py-2 px-2.5 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[40px] ${
+                    className={`py-2 px-2.5 sm:px-3 rounded-xl text-xs sm:text-sm font-medium transition-all min-h-[40px] ${
                       productRange === range
                         ? "bg-mf-green text-white ring-2 ring-mf-green/30 shadow-lg shadow-mf-green/10"
                         : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
@@ -545,7 +545,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             <div className="flex gap-2">
               <button
                 onClick={() => switchForecastMode("current")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
                   forecastMode === "current"
                     ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
@@ -555,7 +555,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
               </button>
               <button
                 onClick={() => switchForecastMode("tomorrow")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
                   forecastMode === "tomorrow"
                     ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
@@ -575,7 +575,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Quiver Selector */}
       {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Quiver Selector
@@ -589,7 +589,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           <div className="flex gap-2">
             <button
               onClick={() => setDiscipline("ski")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
                 discipline === "ski"
                   ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
                   : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
@@ -599,7 +599,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             </button>
             <button
               onClick={() => setDiscipline("snowboard")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
                 discipline === "snowboard"
                   ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
                   : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"

@@ -22,15 +22,31 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Liquid glass card surface */
+.liquid-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
 /* Card hover lift — disabled on touch devices to avoid sticky hover */
 .card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 @media (hover: hover) {
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(123, 142, 200, 0.12);
+    transform: translateY(-3px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 16px 40px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(123, 142, 200, 0.12);
   }
+}
+
+/* Glossy button surface */
+.liquid-btn {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 50%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Button press feedback */
@@ -58,7 +74,7 @@ button:active:not(:disabled) {
 
 /* Heading glow */
 .text-glow {
-  text-shadow: 0 0 30px rgba(123, 142, 200, 0.3);
+  text-shadow: 0 0 30px rgba(123, 142, 200, 0.3), 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Weather background animations */
