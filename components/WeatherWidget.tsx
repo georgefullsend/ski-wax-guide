@@ -28,7 +28,7 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
   return (
     <div className="bg-cream-dark/50 rounded-2xl p-4 sm:p-5 border border-amber/10 space-y-3 sm:space-y-4">
       <h2 className="text-sm font-semibold text-bark-light">
-        {isTomorrow ? "Tomorrow\u2019s Forecast" : "Current Conditions"}
+        {isTomorrow ? "Tomorrow's Forecast" : "Current Conditions"}
       </h2>
 
       {/* Main condition row */}
@@ -68,11 +68,11 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
         </div>
         <div className="bg-cream/70 rounded-xl px-2.5 sm:px-3 py-2">
           <span className="text-bark-light/60 text-xs sm:text-sm">Cloud: </span>
-          <span className="text-bark-light text-xs sm:text-sm">{isTomorrow ? "\u2014" : `${conditions.cloudCover}%`}</span>
+          <span className="text-bark-light text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.cloudCover}%`}</span>
         </div>
         <div className="bg-cream/70 rounded-xl px-2.5 sm:px-3 py-2">
           <span className="text-bark-light/60 text-xs sm:text-sm">Humid: </span>
-          <span className="text-bark-light text-xs sm:text-sm">{isTomorrow ? "\u2014" : `${conditions.humidity}%`}</span>
+          <span className="text-bark-light text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.humidity}%`}</span>
         </div>
       </div>
 

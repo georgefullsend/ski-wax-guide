@@ -257,7 +257,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             )}
             <span className="font-heading text-bark font-medium text-base sm:text-lg">
               {locationName || "Manual Input"}
-              {currentTemp && <span className="text-bark-light"> \u2014 {currentTemp.f}°F</span>}
+              {currentTemp && <span className="text-bark-light"> — {currentTemp.f}°F</span>}
             </span>
           </div>
           <svg className="w-5 h-5 text-bark-light/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
