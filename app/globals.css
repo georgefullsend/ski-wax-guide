@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-mf-blue: #7B8EC8;
-  --color-mf-blue-dark: #5F72AC;
-  --color-mf-blue-darker: #4A5B8F;
-  --color-mf-green: #6A9E78;
-  --color-mf-green-dark: #548763;
-  --color-mf-green-darker: #42704F;
+  --color-neon: #BFFF00;
+  --color-neon-dark: #99CC00;
+  --color-neon-darker: #739900;
+  --color-cyan: #00E5FF;
+  --color-cyan-dark: #00B8CC;
+  --color-cyan-darker: #008A99;
 }
 
 html {
@@ -15,21 +15,22 @@ html {
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background: #0a0a0a;
 }
 
-/* Card hover lift — disabled on touch devices to avoid sticky hover */
+/* Card hover — neon glow on hover, disabled on touch */
 .card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 @media (hover: hover) {
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(123, 142, 200, 0.12);
+    box-shadow: 0 0 24px rgba(191, 255, 0, 0.1), 0 0 48px rgba(191, 255, 0, 0.05);
+    border-color: rgba(191, 255, 0, 0.3) !important;
   }
 }
 
@@ -39,7 +40,7 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* Prevent iOS auto-zoom on input focus (inputs must be >= 16px) */
@@ -56,9 +57,14 @@ button:active:not(:disabled) {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Heading glow */
+/* Heading glow — neon */
 .text-glow {
-  text-shadow: 0 0 30px rgba(123, 142, 200, 0.3);
+  text-shadow: 0 0 40px rgba(191, 255, 0, 0.4), 0 0 80px rgba(191, 255, 0, 0.15);
+}
+
+/* Neon border glow utility */
+.neon-border {
+  box-shadow: 0 0 12px rgba(191, 255, 0, 0.08), inset 0 0 12px rgba(191, 255, 0, 0.03);
 }
 
 /* Weather background animations */

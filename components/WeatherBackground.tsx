@@ -20,14 +20,14 @@ function getScene(conditions: WeatherConditions | null): Scene {
 }
 
 const gradients: Record<Scene, string> = {
-  default: "from-[#1e3a5f] via-[#2a4a6b] to-[#1a3050]",
-  clearDay: "from-[#4a90d9] via-[#5ba0e8] to-[#3a7bc8]",
-  clearNight: "from-[#0a1628] via-[#111d3a] to-[#0d1529]",
-  partlyCloudy: "from-[#5a8ab5] via-[#7a9ebf] to-[#8aa8c4]",
-  overcast: "from-[#6a7a8a] via-[#7d8d9d] to-[#8a96a4]",
-  snow: "from-[#7a8a9a] via-[#8d9dab] to-[#9aabba]",
-  rain: "from-[#3a4a5a] via-[#4a5a6a] to-[#3d4d5d]",
-  thunderstorm: "from-[#1a1a2e] via-[#252540] to-[#1e1e35]",
+  default: "from-[#0a0a0a] via-[#111111] to-[#0d0d0d]",
+  clearDay: "from-[#1a2a3a] via-[#1e3048] to-[#152535]",
+  clearNight: "from-[#050a14] via-[#0a1020] to-[#060c15]",
+  partlyCloudy: "from-[#1a2530] via-[#222e38] to-[#1e2830]",
+  overcast: "from-[#1a1e22] via-[#222628] to-[#1c2024]",
+  snow: "from-[#1a2028] via-[#222830] to-[#1e2530]",
+  rain: "from-[#0e1418] via-[#141a1e] to-[#101518]",
+  thunderstorm: "from-[#0a0a12] via-[#101018] to-[#0c0c14]",
 };
 
 interface WeatherBackgroundProps {
