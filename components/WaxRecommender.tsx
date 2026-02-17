@@ -164,7 +164,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           await fetchWeatherByCoords(
             latitude,
             longitude,
-            `${latitude.toFixed(2)}\u00B0N, ${longitude.toFixed(2)}\u00B0W`
+            `${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°W`
           );
         } catch {
           setError("Failed to fetch weather data. Please try manual input.");
@@ -257,7 +257,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             )}
             <span className="font-heading text-bark font-medium text-base sm:text-lg">
               {locationName || "Manual Input"}
-              {currentTemp && <span className="text-bark-light"> \u2014 {currentTemp.f}\u00B0F</span>}
+              {currentTemp && <span className="text-bark-light"> \u2014 {currentTemp.f}°F</span>}
             </span>
           </div>
           <svg className="w-5 h-5 text-bark-light/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -451,7 +451,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             <div className="text-right text-xs sm:text-sm text-bark-light/70 flex-shrink-0">
               {locationName && <div className="truncate max-w-[140px] sm:max-w-none">{locationName}</div>}
               <div>
-                {currentTemp.f}\u00B0F / {currentTemp.c}\u00B0C
+                {currentTemp.f}°F / {currentTemp.c}°C
               </div>
             </div>
           </div>

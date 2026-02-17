@@ -40,15 +40,15 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
         {isTomorrow && tempLow != null ? (
           <div className="text-right">
             <span className="text-xl sm:text-2xl font-bold text-bark">
-              {Math.round(conditions.tempF)}\u00B0F
+              {Math.round(conditions.tempF)}°F
             </span>
             <span className="text-bark-light/60 text-xs sm:text-sm block">
-              Low: {tempLow}\u00B0F
+              Low: {tempLow}°F
             </span>
           </div>
         ) : (
           <span className="text-xl sm:text-2xl font-bold text-bark">
-            {Math.round(conditions.tempF)}\u00B0F
+            {Math.round(conditions.tempF)}°F
           </span>
         )}
       </div>
@@ -83,7 +83,7 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
             Snow Surface Estimate
           </span>
           <span className="text-bark font-bold text-sm sm:text-base flex-shrink-0">
-            {effectiveTempF}\u00B0F / {effectiveTempC}\u00B0C
+            {effectiveTempF}°F / {effectiveTempC}°C
           </span>
         </div>
         <p className="text-bark-light/60 text-xs">{explanation}</p>
