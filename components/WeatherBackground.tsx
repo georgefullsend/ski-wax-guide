@@ -20,14 +20,14 @@ function getScene(conditions: WeatherConditions | null): Scene {
 }
 
 const gradients: Record<Scene, string> = {
-  default: "from-[#1e3a5f] via-[#2a4a6b] to-[#1a3050]",
-  clearDay: "from-[#4a90d9] via-[#5ba0e8] to-[#3a7bc8]",
-  clearNight: "from-[#0a1628] via-[#111d3a] to-[#0d1529]",
-  partlyCloudy: "from-[#5a8ab5] via-[#7a9ebf] to-[#8aa8c4]",
-  overcast: "from-[#6a7a8a] via-[#7d8d9d] to-[#8a96a4]",
-  snow: "from-[#7a8a9a] via-[#8d9dab] to-[#9aabba]",
-  rain: "from-[#3a4a5a] via-[#4a5a6a] to-[#3d4d5d]",
-  thunderstorm: "from-[#1a1a2e] via-[#252540] to-[#1e1e35]",
+  default: "from-[#E8DCC8] via-[#DDD0B8] to-[#D5C8A8]",
+  clearDay: "from-[#87CEEB]/40 via-[#E8DCC8] to-[#DDD0B8]",
+  clearNight: "from-[#2C1810] via-[#3E2723] to-[#1A0F0A]",
+  partlyCloudy: "from-[#C8BCA8] via-[#D5C8B0] to-[#C0B498]",
+  overcast: "from-[#B8AE9A] via-[#C0B8A8] to-[#B0A898]",
+  snow: "from-[#D8D0C0] via-[#E0D8C8] to-[#D0C8B8]",
+  rain: "from-[#5D4037] via-[#4E342E] to-[#3E2723]",
+  thunderstorm: "from-[#3E2723] via-[#2C1810] to-[#1A0F0A]",
 };
 
 interface WeatherBackgroundProps {
@@ -45,7 +45,6 @@ function seededPositions(count: number, seed: number) {
   return items;
 }
 
-// Cloud shape component — layered circles to form a puffy cloud
 function Cloud({ size, opacity, className, style }: {
   size: number;
   opacity: number;
@@ -56,56 +55,30 @@ function Cloud({ size, opacity, className, style }: {
   const h = size * 0.5;
   return (
     <div className={className} style={{ width: w, height: h, position: "relative", ...style }}>
-      {/* Main body */}
       <div
-        className="absolute rounded-full bg-white"
-        style={{
-          width: w * 0.6, height: h * 0.7,
-          bottom: 0, left: w * 0.2,
-          opacity,
-        }}
+        className="absolute rounded-full bg-amber-50"
+        style={{ width: w * 0.6, height: h * 0.7, bottom: 0, left: w * 0.2, opacity }}
       />
-      {/* Left bump */}
       <div
-        className="absolute rounded-full bg-white"
-        style={{
-          width: w * 0.4, height: h * 0.65,
-          bottom: h * 0.15, left: w * 0.05,
-          opacity,
-        }}
+        className="absolute rounded-full bg-amber-50"
+        style={{ width: w * 0.4, height: h * 0.65, bottom: h * 0.15, left: w * 0.05, opacity }}
       />
-      {/* Right bump */}
       <div
-        className="absolute rounded-full bg-white"
-        style={{
-          width: w * 0.45, height: h * 0.7,
-          bottom: h * 0.1, right: w * 0.05,
-          opacity,
-        }}
+        className="absolute rounded-full bg-amber-50"
+        style={{ width: w * 0.45, height: h * 0.7, bottom: h * 0.1, right: w * 0.05, opacity }}
       />
-      {/* Top bump */}
       <div
-        className="absolute rounded-full bg-white"
-        style={{
-          width: w * 0.35, height: h * 0.6,
-          bottom: h * 0.35, left: w * 0.3,
-          opacity,
-        }}
+        className="absolute rounded-full bg-amber-50"
+        style={{ width: w * 0.35, height: h * 0.6, bottom: h * 0.35, left: w * 0.3, opacity }}
       />
-      {/* Small accent bump */}
       <div
-        className="absolute rounded-full bg-white"
-        style={{
-          width: w * 0.25, height: h * 0.45,
-          bottom: h * 0.3, left: w * 0.55,
-          opacity,
-        }}
+        className="absolute rounded-full bg-amber-50"
+        style={{ width: w * 0.25, height: h * 0.45, bottom: h * 0.3, left: w * 0.55, opacity }}
       />
     </div>
   );
 }
 
-// Dark cloud for rain/storm scenes
 function DarkCloud({ size, opacity, className, style }: {
   size: number;
   opacity: number;
@@ -117,23 +90,23 @@ function DarkCloud({ size, opacity, className, style }: {
   return (
     <div className={className} style={{ width: w, height: h, position: "relative", ...style }}>
       <div
-        className="absolute rounded-full bg-slate-700"
+        className="absolute rounded-full bg-stone-600"
         style={{ width: w * 0.6, height: h * 0.7, bottom: 0, left: w * 0.2, opacity }}
       />
       <div
-        className="absolute rounded-full bg-slate-600"
+        className="absolute rounded-full bg-stone-500"
         style={{ width: w * 0.4, height: h * 0.65, bottom: h * 0.15, left: w * 0.05, opacity }}
       />
       <div
-        className="absolute rounded-full bg-slate-700"
+        className="absolute rounded-full bg-stone-600"
         style={{ width: w * 0.45, height: h * 0.7, bottom: h * 0.1, right: w * 0.05, opacity }}
       />
       <div
-        className="absolute rounded-full bg-slate-600"
+        className="absolute rounded-full bg-stone-500"
         style={{ width: w * 0.35, height: h * 0.6, bottom: h * 0.35, left: w * 0.3, opacity }}
       />
       <div
-        className="absolute rounded-full bg-slate-700"
+        className="absolute rounded-full bg-stone-600"
         style={{ width: w * 0.25, height: h * 0.45, bottom: h * 0.3, left: w * 0.55, opacity }}
       />
     </div>
@@ -157,23 +130,20 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
   const showRain = scene === "rain" || scene === "thunderstorm";
   const showFlash = scene === "thunderstorm";
 
-  // Cloud density varies by scene
   const cloudOpacity = scene === "overcast" ? 0.85 : scene === "snow" ? 0.7 : 0.5;
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Gradient base */}
       <div
         className={`absolute inset-0 bg-gradient-to-b ${gradients[scene]} transition-all duration-[1500ms] ease-in-out`}
       />
 
-      {/* Stars — only when location is actually nighttime */}
       {showStars && (
         <div className="absolute inset-0 transition-opacity duration-1000">
           {stars.map((s, i) => (
             <div
               key={i}
-              className="absolute rounded-full bg-white animate-twinkle"
+              className="absolute rounded-full bg-amber-100 animate-twinkle"
               style={{
                 left: `${s.left}%`,
                 top: `${(s.delay * 20 + s.duration * 5) % 90}%`,
@@ -187,23 +157,20 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
         </div>
       )}
 
-      {/* Sun */}
       {showSun && !isNight && (
         <div className="absolute top-[8%] right-[15%] transition-opacity duration-1000">
-          <div className="w-32 h-32 rounded-full bg-yellow-300/80 animate-sun-pulse blur-sm" />
-          <div className="absolute inset-0 w-32 h-32 rounded-full bg-yellow-200/40 animate-sun-pulse blur-2xl scale-150" />
+          <div className="w-32 h-32 rounded-full bg-amber-300/80 animate-sun-pulse blur-sm" />
+          <div className="absolute inset-0 w-32 h-32 rounded-full bg-amber-200/40 animate-sun-pulse blur-2xl scale-150" />
         </div>
       )}
 
-      {/* Moon */}
       {showMoon && (
         <div className="absolute top-[10%] right-[18%] transition-opacity duration-1000">
-          <div className="w-20 h-20 rounded-full bg-slate-200/80 blur-[1px]" />
-          <div className="absolute inset-0 w-20 h-20 rounded-full bg-slate-200/20 blur-xl scale-[2]" />
+          <div className="w-20 h-20 rounded-full bg-amber-100/80 blur-[1px]" />
+          <div className="absolute inset-0 w-20 h-20 rounded-full bg-amber-100/20 blur-xl scale-[2]" />
         </div>
       )}
 
-      {/* White clouds — partly cloudy, overcast, snow */}
       {showWhiteClouds && (
         <div className="absolute inset-0 transition-opacity duration-1000">
           <Cloud size={320} opacity={cloudOpacity} className="absolute animate-cloud-drift"
@@ -216,7 +183,6 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
             style={{ top: "18%", left: "60%", animationDuration: "55s", animationDelay: "12s" }} />
           <Cloud size={340} opacity={cloudOpacity * 0.95} className="absolute animate-cloud-drift"
             style={{ top: "8%", left: "80%", animationDuration: "48s", animationDelay: "6s" }} />
-          {/* Extra layer for overcast — fills more of the sky */}
           {scene === "overcast" && (
             <>
               <Cloud size={400} opacity={cloudOpacity * 0.7} className="absolute animate-cloud-drift"
@@ -230,7 +196,6 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
         </div>
       )}
 
-      {/* Dark clouds — rain, thunderstorm */}
       {showDarkClouds && (
         <div className="absolute inset-0 transition-opacity duration-1000">
           <DarkCloud size={380} opacity={0.8} className="absolute animate-cloud-drift"
@@ -248,7 +213,6 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
         </div>
       )}
 
-      {/* Snow */}
       {showSnow && (
         <div className="absolute inset-0 transition-opacity duration-1000">
           {snowflakes.map((s, i) => (
@@ -268,13 +232,12 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
         </div>
       )}
 
-      {/* Rain */}
       {showRain && (
         <div className="absolute inset-0 transition-opacity duration-1000">
           {raindrops.map((r, i) => (
             <div
               key={i}
-              className="absolute bg-blue-200/40 animate-rainfall rounded-full"
+              className="absolute bg-stone-400/40 animate-rainfall rounded-full"
               style={{
                 left: `${r.left}%`,
                 width: "1.5px",
@@ -287,7 +250,6 @@ export default function WeatherBackground({ conditions }: WeatherBackgroundProps
         </div>
       )}
 
-      {/* Lightning flash */}
       {showFlash && (
         <div className="absolute inset-0 bg-white/0 animate-lightning-flash" />
       )}

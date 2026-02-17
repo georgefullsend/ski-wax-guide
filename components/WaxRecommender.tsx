@@ -17,6 +17,7 @@ import {
 import {
   type WeatherConditions,
   calcEffectiveTemp,
+  getWeatherIcon,
 } from "@/lib/weatherTypes";
 import { resorts, type SkiResort } from "@/lib/resorts";
 import WeatherWidget from "./WeatherWidget";
@@ -49,6 +50,8 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
   const [forecastMode, setForecastMode] = useState<"current" | "tomorrow">("current");
   const [tomorrowConditions, setTomorrowConditions] = useState<WeatherConditions | null>(null);
   const [tomorrowTempLow, setTomorrowTempLow] = useState<number | null>(null);
+  const [inputCollapsed, setInputCollapsed] = useState(false);
+  const [quiverOpen, setQuiverOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -103,7 +106,6 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       humidity: current.relative_humidity_2m,
     };
 
-    // Build tomorrow's conditions from daily forecast (index 1)
     const daily = data.daily;
     if (daily && daily.temperature_2m_max?.length > 1) {
       const tomorrowHighF: number = daily.temperature_2m_max[1];
@@ -115,11 +117,11 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         tempC: tomorrowHighC,
         windSpeedMph: daily.wind_speed_10m_max[1] ?? 0,
         windDirection: daily.wind_direction_10m_dominant[1] ?? 0,
-        cloudCover: 50, // not available in daily
+        cloudCover: 50,
         weatherCode: daily.weather_code[1] ?? 0,
-        isDay: true, // forecast is for daytime skiing
+        isDay: true,
         precipitation: daily.precipitation_sum[1] ?? 0,
-        humidity: 50, // not available in daily
+        humidity: 50,
       };
 
       setTomorrowConditions(tomorrow);
@@ -140,6 +142,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         : Math.round(tempC).toString()
     );
     setLocationName(name);
+    setInputCollapsed(true);
   }
 
   async function handleAutoDetect() {
@@ -161,7 +164,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           await fetchWeatherByCoords(
             latitude,
             longitude,
-            `${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°W`
+            `${latitude.toFixed(2)}\u00B0N, ${longitude.toFixed(2)}\u00B0W`
           );
         } catch {
           setError("Failed to fetch weather data. Please try manual input.");
@@ -233,270 +236,261 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
     applyResults(tempF);
     setLocationName("");
+    setInputCollapsed(true);
   }
 
   const quiverOptions = quiver ? quiver[discipline] : [];
+  const activeConditions = forecastMode === "tomorrow" && tomorrowConditions ? tomorrowConditions : weatherConditions;
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
-      {/* Auto-detect section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
-          Auto-Detect Weather
-        </h2>
+    <div className="w-full max-w-xl mx-auto space-y-5 sm:space-y-6">
+
+      {/* Collapsed Input Header — shown after recommendation */}
+      {inputCollapsed && recommendation ? (
         <button
-          onClick={handleAutoDetect}
-          disabled={loading}
-          className={`w-full bg-mf-blue hover:bg-mf-blue-dark active:bg-mf-blue-darker disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-all min-h-[48px] ${loading ? "animate-pulse" : ""}`}
+          onClick={() => setInputCollapsed(false)}
+          className="w-full bg-cream-dark/80 rounded-2xl p-4 sm:p-5 flex items-center justify-between border border-amber/15 shadow-sm card-hover text-left"
         >
-          {loading ? "Detecting location..." : "Use My Location"}
+          <div className="flex items-center gap-2.5">
+            {activeConditions && (
+              <span className="text-xl">{getWeatherIcon(activeConditions.weatherCode, activeConditions.isDay)}</span>
+            )}
+            <span className="font-heading text-bark font-medium text-base sm:text-lg">
+              {locationName || "Manual Input"}
+              {currentTemp && <span className="text-bark-light"> \u2014 {currentTemp.f}\u00B0F</span>}
+            </span>
+          </div>
+          <svg className="w-5 h-5 text-bark-light/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+          </svg>
         </button>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-mf-blue/30" />
-        <span className="text-mf-blue/60 text-sm font-medium">or</span>
-        <div className="flex-1 h-px bg-mf-blue/30" />
-      </div>
-
-      {/* Resort picker section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover relative z-30">
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
-          Pick a Resort
-        </h2>
-        <div className="relative">
-          <input
-            type="text"
-            value={resortSearch}
-            onChange={(e) => {
-              setResortSearch(e.target.value);
-              setShowResortDropdown(true);
-            }}
-            onFocus={() => setShowResortDropdown(true)}
-            placeholder="Search resorts..."
-            className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
-          />
-          {showResortDropdown && (
-            <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
-              {(() => {
-                const query = resortSearch.toLowerCase();
-                const filtered = resorts.filter((r) =>
-                  r.name.toLowerCase().includes(query)
-                );
-                if (filtered.length === 0) {
-                  return (
-                    <div className="px-4 py-3 text-white/40 text-sm">
-                      No resorts found
-                    </div>
-                  );
-                }
-
-                const favoriteResorts = filtered.filter((r) =>
-                  favorites.has(r.name)
-                );
-                const regions = [...new Set(filtered.map((r) => r.region))];
-
-                const renderResortRow = (resort: SkiResort) => (
-                  <div
-                    key={resort.name}
-                    className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
-                  >
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(resort.name);
-                      }}
-                      className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                      aria-label={
-                        favorites.has(resort.name)
-                          ? `Unfavorite ${resort.name}`
-                          : `Favorite ${resort.name}`
-                      }
-                    >
-                      {favorites.has(resort.name) ? (
-                        <span className="text-yellow-400">&#9733;</span>
-                      ) : (
-                        <span className="text-white/30 hover:text-yellow-400/60">&#9734;</span>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleResortSelect(resort)}
-                      className="flex-1 text-left pr-4 py-3 text-sm text-white/80 hover:text-white active:text-white transition-colors min-h-[44px] flex items-center"
-                    >
-                      {resort.name}
-                    </button>
-                  </div>
-                );
-
-                return (
-                  <>
-                    {favoriteResorts.length > 0 && (
-                      <div>
-                        <div className="px-4 py-2 text-xs font-semibold text-yellow-400/70 uppercase tracking-wider sticky top-0 bg-slate-800/95 flex items-center gap-1">
-                          <span>&#9733;</span> Favorites
-                        </div>
-                        {favoriteResorts.map(renderResortRow)}
-                      </div>
-                    )}
-                    {regions.map((region) => (
-                      <div key={region}>
-                        <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
-                          {region}
-                        </div>
-                        {filtered
-                          .filter((r) => r.region === region)
-                          .map(renderResortRow)}
-                      </div>
-                    ))}
-                  </>
-                );
-              })()}
-            </div>
-          )}
-        </div>
-        {/* Click outside to close */}
-        {showResortDropdown && (
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => setShowResortDropdown(false)}
-          />
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-mf-blue/30" />
-        <span className="text-mf-blue/60 text-sm font-medium">or</span>
-        <div className="flex-1 h-px bg-mf-blue/30" />
-      </div>
-
-      {/* Manual input section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
-          Enter Temperature
-        </h2>
-        <form onSubmit={handleManualSubmit} className="space-y-4">
-          <div className="flex gap-3">
-            <input
-              type="number"
-              inputMode="decimal"
-              value={tempInput}
-              onChange={(e) => setTempInput(e.target.value)}
-              placeholder={unit === "F" ? "e.g. 25" : "e.g. -4"}
-              className="flex-1 bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
-            />
+      ) : (
+        /* Full Input Sections */
+        <>
+          {/* Auto-detect section */}
+          <div className="bg-cream/90 rounded-2xl p-4 sm:p-6 border border-amber/15 shadow-md card-hover">
+            <h2 className="font-heading text-base sm:text-lg font-semibold text-bark mb-3">
+              Auto-Detect Weather
+            </h2>
             <button
-              type="button"
-              onClick={() => setUnit(unit === "F" ? "C" : "F")}
-              className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-mf-blue/30 rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
+              onClick={handleAutoDetect}
+              disabled={loading}
+              className={`w-full bg-amber hover:bg-amber-dark active:bg-amber-dark disabled:bg-amber/50 disabled:cursor-wait text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-all min-h-[48px] ${loading ? "animate-pulse" : ""}`}
             >
-              °{unit}
+              {loading ? "Detecting location..." : "Use My Location"}
             </button>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-mf-green hover:bg-mf-green-dark active:bg-mf-green-darker text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-colors min-h-[48px]"
-          >
-            Get Recommendation
-          </button>
-        </form>
-      </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-amber/20" />
+            <span className="text-bark-light/50 text-sm font-medium">or</span>
+            <div className="flex-1 h-px bg-amber/20" />
+          </div>
+
+          {/* Resort picker section */}
+          <div className="bg-cream/90 rounded-2xl p-4 sm:p-6 border border-amber/15 shadow-md card-hover relative z-30">
+            <h2 className="font-heading text-base sm:text-lg font-semibold text-bark mb-3">
+              Pick a Resort
+            </h2>
+            <div className="relative">
+              <input
+                type="text"
+                value={resortSearch}
+                onChange={(e) => {
+                  setResortSearch(e.target.value);
+                  setShowResortDropdown(true);
+                }}
+                onFocus={() => setShowResortDropdown(true)}
+                placeholder="Search resorts..."
+                className="w-full bg-cream border border-amber/20 rounded-xl px-4 py-3 text-base sm:text-sm text-bark placeholder-bark-light/40 focus:outline-none focus:ring-2 focus:ring-amber/50 focus:border-transparent"
+              />
+              {showResortDropdown && (
+                <div className="absolute z-40 mt-2 w-full bg-cream/98 backdrop-blur-md border border-amber/20 rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
+                  {(() => {
+                    const query = resortSearch.toLowerCase();
+                    const filtered = resorts.filter((r) =>
+                      r.name.toLowerCase().includes(query)
+                    );
+                    if (filtered.length === 0) {
+                      return (
+                        <div className="px-4 py-3 text-bark-light/50 text-sm">
+                          No resorts found
+                        </div>
+                      );
+                    }
+
+                    const favoriteResorts = filtered.filter((r) =>
+                      favorites.has(r.name)
+                    );
+                    const regions = [...new Set(filtered.map((r) => r.region))];
+
+                    const renderResortRow = (resort: SkiResort) => (
+                      <div
+                        key={resort.name}
+                        className="flex items-center hover:bg-amber/8 active:bg-amber/12 transition-colors"
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(resort.name);
+                          }}
+                          className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          aria-label={
+                            favorites.has(resort.name)
+                              ? `Unfavorite ${resort.name}`
+                              : `Favorite ${resort.name}`
+                          }
+                        >
+                          {favorites.has(resort.name) ? (
+                            <span className="text-amber">&#9733;</span>
+                          ) : (
+                            <span className="text-bark-light/30 hover:text-amber/60">&#9734;</span>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleResortSelect(resort)}
+                          className="flex-1 text-left pr-4 py-3 text-sm text-bark-light hover:text-bark active:text-bark transition-colors min-h-[44px] flex items-center"
+                        >
+                          {resort.name}
+                        </button>
+                      </div>
+                    );
+
+                    return (
+                      <>
+                        {favoriteResorts.length > 0 && (
+                          <div>
+                            <div className="px-4 py-2 text-xs font-semibold text-amber uppercase tracking-wider sticky top-0 bg-cream/98 flex items-center gap-1">
+                              <span>&#9733;</span> Favorites
+                            </div>
+                            {favoriteResorts.map(renderResortRow)}
+                          </div>
+                        )}
+                        {regions.map((region) => (
+                          <div key={region}>
+                            <div className="px-4 py-2 text-xs font-semibold text-forest/70 uppercase tracking-wider sticky top-0 bg-cream/98">
+                              {region}
+                            </div>
+                            {filtered
+                              .filter((r) => r.region === region)
+                              .map(renderResortRow)}
+                          </div>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+            {showResortDropdown && (
+              <div
+                className="fixed inset-0 z-30"
+                onClick={() => setShowResortDropdown(false)}
+              />
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-amber/20" />
+            <span className="text-bark-light/50 text-sm font-medium">or</span>
+            <div className="flex-1 h-px bg-amber/20" />
+          </div>
+
+          {/* Manual input section */}
+          <div className="bg-cream/90 rounded-2xl p-4 sm:p-6 border border-amber/15 shadow-md card-hover">
+            <h2 className="font-heading text-base sm:text-lg font-semibold text-bark mb-3">
+              Enter Temperature
+            </h2>
+            <form onSubmit={handleManualSubmit} className="space-y-4">
+              <div className="flex gap-3">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={tempInput}
+                  onChange={(e) => setTempInput(e.target.value)}
+                  placeholder={unit === "F" ? "e.g. 25" : "e.g. -4"}
+                  className="flex-1 bg-cream border border-amber/20 rounded-xl px-4 py-3 text-base sm:text-sm text-bark placeholder-bark-light/40 focus:outline-none focus:ring-2 focus:ring-amber/50 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setUnit(unit === "F" ? "C" : "F")}
+                  className="bg-amber/10 hover:bg-amber/20 active:bg-amber/25 border border-amber/20 rounded-xl px-4 py-3 text-bark font-medium transition-colors min-w-[60px] min-h-[48px]"
+                >
+                  °{unit}
+                </button>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-forest hover:bg-forest-dark active:bg-forest-dark text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-colors min-h-[48px]"
+              >
+                Get Recommendation
+              </button>
+            </form>
+          </div>
+        </>
+      )}
 
       {/* Error display */}
       {error && (
-        <div className="bg-red-500/20 border border-red-500/40 rounded-xl p-4 text-red-200 text-sm">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
           {error}
         </div>
       )}
 
-      {/* Forecast mode toggle + Weather Widget — only shown for API-fetched weather */}
-      {weatherConditions && (
-        <>
-          {tomorrowConditions && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => switchForecastMode("current")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
-                  forecastMode === "current"
-                    ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-                }`}
-              >
-                Current Conditions
-              </button>
-              <button
-                onClick={() => switchForecastMode("tomorrow")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
-                  forecastMode === "tomorrow"
-                    ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-                }`}
-              >
-                Tomorrow&#39;s Forecast
-              </button>
-            </div>
-          )}
-          <WeatherWidget
-            conditions={forecastMode === "tomorrow" && tomorrowConditions ? tomorrowConditions : weatherConditions}
-            mode={forecastMode}
-            tempLow={forecastMode === "tomorrow" ? tomorrowTempLow ?? undefined : undefined}
-          />
-        </>
-      )}
-
-      {/* Wax Result display */}
+      {/* === HERO: Wax Recommendation === */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 card-hover">
+        <div className="bg-cream/95 rounded-2xl p-5 sm:p-7 border border-amber/20 shadow-lg space-y-4 sm:space-y-5">
           <div className="flex items-start sm:items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
+            <h2 className="font-heading text-lg sm:text-xl font-bold text-bark">
               Recommended Wax
             </h2>
-            <div className="text-right text-xs sm:text-sm text-white/70 flex-shrink-0">
+            <div className="text-right text-xs sm:text-sm text-bark-light/70 flex-shrink-0">
               {locationName && <div className="truncate max-w-[140px] sm:max-w-none">{locationName}</div>}
               <div>
-                {currentTemp.f}°F / {currentTemp.c}°C
+                {currentTemp.f}\u00B0F / {currentTemp.c}\u00B0C
               </div>
             </div>
           </div>
 
-          {/* Wax color indicator + name */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Wax color swatch + name — HERO element */}
+          <div className="flex items-center gap-4 sm:gap-5">
             <div
-              className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl shadow-lg flex-shrink-0"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl shadow-lg flex-shrink-0 ring-2 ring-white/50"
               style={{ backgroundColor: recommendation.colorHex }}
             />
             <div>
-              <div className="text-xl sm:text-2xl font-bold text-white">
+              <div className="font-heading text-2xl sm:text-3xl font-bold text-bark leading-tight">
                 {recommendation.color} Wax
               </div>
-              <div className="text-white/70 text-sm">{recommendation.name}</div>
+              <div className="text-bark-light text-sm mt-0.5">{recommendation.name}</div>
             </div>
           </div>
 
           {/* Temp range */}
-          <div className="bg-white/5 rounded-xl p-3 text-sm text-white/80">
-            <span className="font-medium text-white">Range:</span>{" "}
+          <div className="bg-cream-dark/60 rounded-xl p-3 text-sm text-bark-light">
+            <span className="font-semibold text-bark">Range:</span>{" "}
             {recommendation.tempRangeF} ({recommendation.tempRangeC})
           </div>
 
           {/* Condition note */}
           {recommendation.conditionNote && (
-            <div className="bg-mf-blue/10 border border-mf-blue/20 rounded-xl p-3 text-sm text-white/80">
+            <div className="bg-amber/8 border border-amber/15 rounded-xl p-3 text-sm text-bark-light leading-relaxed">
               {recommendation.conditionNote}
             </div>
           )}
 
           {/* Description */}
-          <p className="text-white/80 text-sm leading-relaxed">
+          <p className="text-bark-light text-sm leading-relaxed">
             {recommendation.description}
           </p>
 
           {/* Product range selector */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-2">
+            <h3 className="font-heading text-sm font-semibold text-bark mb-2">
               Product Range
             </h3>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -507,8 +501,8 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                     onClick={() => setProductRange(range)}
                     className={`py-2 px-2.5 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[40px] ${
                       productRange === range
-                        ? "bg-mf-green text-white ring-2 ring-mf-green/30 shadow-lg shadow-mf-green/10"
-                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
+                        ? "bg-amber text-white ring-2 ring-amber/30 shadow-md shadow-amber/10"
+                        : "bg-cream-dark/60 text-bark-light hover:bg-cream-dark hover:text-bark active:bg-cream-dark"
                     }`}
                   >
                     {productRangeLabels[range]}
@@ -520,17 +514,17 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
           {/* Suggested products */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-2">
+            <h3 className="font-heading text-sm font-semibold text-bark mb-2">
               Suggested Products
             </h3>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               {recommendation.products[productRange].map((product) => (
                 <li
                   key={product}
-                  className="text-white/70 text-sm flex items-center gap-2"
+                  className="text-bark-light text-sm flex items-center gap-2"
                 >
                   <span
-                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-1 ring-black/10"
                     style={{ backgroundColor: recommendation.colorHex }}
                   />
                   {product}
@@ -541,78 +535,128 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         </div>
       )}
 
-      {/* Quiver Selector */}
-      {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 card-hover">
-          <div className="flex items-start sm:items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
-              Quiver Selector
-            </h2>
-            <span className="text-xs sm:text-sm text-white/50 flex-shrink-0">{quiver.condition}</span>
-          </div>
-
-          <p className="text-white/70 text-sm">{quiver.description}</p>
-
-          {/* Ski / Snowboard toggle */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDiscipline("ski")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
-                discipline === "ski"
-                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-              }`}
-            >
-              Skis
-            </button>
-            <button
-              onClick={() => setDiscipline("snowboard")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
-                discipline === "snowboard"
-                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-              }`}
-            >
-              Snowboards
-            </button>
-          </div>
-
-          {/* Quiver options */}
-          <div className="space-y-3">
-            {quiverOptions.map((option) => (
-              <div
-                key={option.name}
-                className="bg-white/5 rounded-xl p-3 sm:p-4 space-y-2"
+      {/* Forecast mode toggle + Weather Widget */}
+      {weatherConditions && (
+        <>
+          {tomorrowConditions && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => switchForecastMode("current")}
+                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                  forecastMode === "current"
+                    ? "bg-forest text-white shadow-md"
+                    : "bg-cream-dark/60 text-bark-light hover:bg-cream-dark hover:text-bark active:bg-cream-dark"
+                }`}
               >
-                <div className="flex items-start sm:items-center justify-between gap-2">
-                  <h3 className="text-white font-semibold text-sm">
-                    {option.name}
-                  </h3>
-                  <span className="text-mf-blue text-xs font-medium flex-shrink-0 text-right">
-                    {option.bestFor}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <div className="text-white/50">
-                    Length:{" "}
-                    <span className="text-white/80">{option.length}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Waist:{" "}
-                    <span className="text-white/80">{option.waistWidth}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Shape:{" "}
-                    <span className="text-white/80">{option.shape}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Camber:{" "}
-                    <span className="text-white/80">{option.camber}</span>
-                  </div>
-                </div>
+                Current Conditions
+              </button>
+              <button
+                onClick={() => switchForecastMode("tomorrow")}
+                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                  forecastMode === "tomorrow"
+                    ? "bg-forest text-white shadow-md"
+                    : "bg-cream-dark/60 text-bark-light hover:bg-cream-dark hover:text-bark active:bg-cream-dark"
+                }`}
+              >
+                Tomorrow&#39;s Forecast
+              </button>
+            </div>
+          )}
+          <WeatherWidget
+            conditions={activeConditions!}
+            mode={forecastMode}
+            tempLow={forecastMode === "tomorrow" ? tomorrowTempLow ?? undefined : undefined}
+          />
+        </>
+      )}
+
+      {/* Quiver Selector — Collapsible */}
+      {quiver && currentTemp && (
+        <div className="bg-cream/90 rounded-2xl border border-amber/15 shadow-md overflow-hidden">
+          <button
+            onClick={() => setQuiverOpen(!quiverOpen)}
+            className="w-full flex items-center justify-between p-4 sm:p-5 text-left"
+          >
+            <div>
+              <h2 className="font-heading text-base sm:text-lg font-semibold text-bark">
+                Quiver Selector
+              </h2>
+              <span className="text-xs sm:text-sm text-bark-light/60">{quiver.condition}</span>
+            </div>
+            <svg
+              className={`w-5 h-5 text-bark-light/50 transition-transform duration-200 ${quiverOpen ? "rotate-180" : ""}`}
+              fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          {quiverOpen && (
+            <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-4">
+              <p className="text-bark-light text-sm leading-relaxed">{quiver.description}</p>
+
+              {/* Ski / Snowboard toggle */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDiscipline("ski")}
+                  className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                    discipline === "ski"
+                      ? "bg-forest text-white shadow-md"
+                      : "bg-cream-dark/60 text-bark-light hover:bg-cream-dark hover:text-bark active:bg-cream-dark"
+                  }`}
+                >
+                  Skis
+                </button>
+                <button
+                  onClick={() => setDiscipline("snowboard")}
+                  className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
+                    discipline === "snowboard"
+                      ? "bg-forest text-white shadow-md"
+                      : "bg-cream-dark/60 text-bark-light hover:bg-cream-dark hover:text-bark active:bg-cream-dark"
+                  }`}
+                >
+                  Snowboards
+                </button>
               </div>
-            ))}
-          </div>
+
+              {/* Quiver options */}
+              <div className="space-y-3">
+                {quiverOptions.map((option) => (
+                  <div
+                    key={option.name}
+                    className="bg-cream-dark/50 rounded-xl p-3 sm:p-4 space-y-2"
+                  >
+                    <div className="flex items-start sm:items-center justify-between gap-2">
+                      <h3 className="text-bark font-semibold text-sm">
+                        {option.name}
+                      </h3>
+                      <span className="text-forest text-xs font-medium flex-shrink-0 text-right">
+                        {option.bestFor}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                      <div className="text-bark-light/60">
+                        Length:{" "}
+                        <span className="text-bark-light">{option.length}</span>
+                      </div>
+                      <div className="text-bark-light/60">
+                        Waist:{" "}
+                        <span className="text-bark-light">{option.waistWidth}</span>
+                      </div>
+                      <div className="text-bark-light/60">
+                        Shape:{" "}
+                        <span className="text-bark-light">{option.shape}</span>
+                      </div>
+                      <div className="text-bark-light/60">
+                        Camber:{" "}
+                        <span className="text-bark-light">{option.camber}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

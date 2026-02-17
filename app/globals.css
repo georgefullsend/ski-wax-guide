@@ -1,12 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-mf-blue: #7B8EC8;
-  --color-mf-blue-dark: #5F72AC;
-  --color-mf-blue-darker: #4A5B8F;
-  --color-mf-green: #6A9E78;
-  --color-mf-green-dark: #548763;
-  --color-mf-green-darker: #42704F;
+  --color-amber: #D97706;
+  --color-amber-light: #F59E0B;
+  --color-amber-dark: #B45309;
+  --color-cream: #FFFBF0;
+  --color-cream-dark: #F0E8D4;
+  --color-bark: #3E2723;
+  --color-bark-light: #5D4037;
+  --color-forest: #2E7D32;
+  --color-forest-dark: #1B5E20;
+  --color-forest-light: #4CAF50;
+  --color-parchment: #FAF3E0;
 }
 
 html {
@@ -14,22 +19,27 @@ html {
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background: #FAF3E0;
+  color: #3E2723;
 }
 
-/* Card hover lift — disabled on touch devices to avoid sticky hover */
+/* Heading font utility */
+.font-heading {
+  font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+}
+
+/* Card hover — warm shadow lift, disabled on touch */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 @media (hover: hover) {
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(123, 142, 200, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(217, 119, 6, 0.08), 0 2px 8px rgba(62, 39, 35, 0.06);
   }
 }
 
@@ -56,9 +66,9 @@ button:active:not(:disabled) {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Heading glow */
+/* Warm heading glow */
 .text-glow {
-  text-shadow: 0 0 30px rgba(123, 142, 200, 0.3);
+  text-shadow: 0 1px 2px rgba(62, 39, 35, 0.15);
 }
 
 /* Weather background animations */
