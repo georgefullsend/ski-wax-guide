@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getWaxRecommendation,
   celsiusToFahrenheit,
@@ -45,6 +45,31 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     useState<WeatherConditions | null>(null);
   const [resortSearch, setResortSearch] = useState("");
   const [showResortDropdown, setShowResortDropdown] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("favoriteResorts");
+      if (stored) {
+        setFavorites(new Set(JSON.parse(stored)));
+      }
+    } catch {
+      // ignore corrupt localStorage
+    }
+  }, []);
+
+  function toggleFavorite(resortName: string) {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(resortName)) {
+        next.delete(resortName);
+      } else {
+        next.add(resortName);
+      }
+      localStorage.setItem("favoriteResorts", JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   function applyResults(tempF: number, conditions?: WeatherConditions) {
     const effectiveF = conditions ? calcEffectiveTemp(conditions) : tempF;
@@ -163,16 +188,16 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
   const quiverOptions = quiver ? quiver[discipline] : [];
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-6">
+    <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
       {/* Auto-detect section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover">
-        <h2 className="text-lg font-semibold text-white mb-3">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
+        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
           Auto-Detect Weather
         </h2>
         <button
           onClick={handleAutoDetect}
           disabled={loading}
-          className={`w-full bg-mf-blue hover:bg-mf-blue-dark disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3 px-6 rounded-xl transition-all ${loading ? "animate-pulse" : ""}`}
+          className={`w-full bg-mf-blue hover:bg-mf-blue-dark active:bg-mf-blue-darker disabled:bg-mf-blue-darker disabled:cursor-wait text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-all min-h-[48px] ${loading ? "animate-pulse" : ""}`}
         >
           {loading ? "Detecting location..." : "Use My Location"}
         </button>
@@ -186,8 +211,8 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       </div>
 
       {/* Resort picker section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover relative z-30">
-        <h2 className="text-lg font-semibold text-white mb-3">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover relative z-30">
+        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
           Pick a Resort
         </h2>
         <div className="relative">
@@ -200,10 +225,10 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             }}
             onFocus={() => setShowResortDropdown(true)}
             placeholder="Search resorts..."
-            className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+            className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
           />
           {showResortDropdown && (
-            <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-64 overflow-y-auto shadow-xl">
+            <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
               {(() => {
                 const query = resortSearch.toLowerCase();
                 const filtered = resorts.filter((r) =>
@@ -216,26 +241,68 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                     </div>
                   );
                 }
+
+                const favoriteResorts = filtered.filter((r) =>
+                  favorites.has(r.name)
+                );
                 const regions = [...new Set(filtered.map((r) => r.region))];
-                return regions.map((region) => (
-                  <div key={region}>
-                    <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
-                      {region}
-                    </div>
-                    {filtered
-                      .filter((r) => r.region === region)
-                      .map((resort) => (
-                        <button
-                          key={resort.name}
-                          type="button"
-                          onClick={() => handleResortSelect(resort)}
-                          className="w-full text-left px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                        >
-                          {resort.name}
-                        </button>
-                      ))}
+
+                const renderResortRow = (resort: SkiResort) => (
+                  <div
+                    key={resort.name}
+                    className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(resort.name);
+                      }}
+                      className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      aria-label={
+                        favorites.has(resort.name)
+                          ? `Unfavorite ${resort.name}`
+                          : `Favorite ${resort.name}`
+                      }
+                    >
+                      {favorites.has(resort.name) ? (
+                        <span className="text-yellow-400">&#9733;</span>
+                      ) : (
+                        <span className="text-white/30 hover:text-yellow-400/60">&#9734;</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleResortSelect(resort)}
+                      className="flex-1 text-left pr-4 py-3 text-sm text-white/80 hover:text-white active:text-white transition-colors min-h-[44px] flex items-center"
+                    >
+                      {resort.name}
+                    </button>
                   </div>
-                ));
+                );
+
+                return (
+                  <>
+                    {favoriteResorts.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 text-xs font-semibold text-yellow-400/70 uppercase tracking-wider sticky top-0 bg-slate-800/95 flex items-center gap-1">
+                          <span>&#9733;</span> Favorites
+                        </div>
+                        {favoriteResorts.map(renderResortRow)}
+                      </div>
+                    )}
+                    {regions.map((region) => (
+                      <div key={region}>
+                        <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
+                          {region}
+                        </div>
+                        {filtered
+                          .filter((r) => r.region === region)
+                          .map(renderResortRow)}
+                      </div>
+                    ))}
+                  </>
+                );
               })()}
             </div>
           )}
@@ -257,30 +324,31 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       </div>
 
       {/* Manual input section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 card-hover">
-        <h2 className="text-lg font-semibold text-white mb-3">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 card-hover">
+        <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
           Enter Temperature
         </h2>
         <form onSubmit={handleManualSubmit} className="space-y-4">
           <div className="flex gap-3">
             <input
               type="number"
+              inputMode="decimal"
               value={tempInput}
               onChange={(e) => setTempInput(e.target.value)}
               placeholder={unit === "F" ? "e.g. 25" : "e.g. -4"}
-              className="flex-1 bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+              className="flex-1 bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
             />
             <button
               type="button"
               onClick={() => setUnit(unit === "F" ? "C" : "F")}
-              className="bg-mf-blue/20 hover:bg-mf-blue/30 border border-mf-blue/30 rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px]"
+              className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-mf-blue/30 rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
             >
               °{unit}
             </button>
           </div>
           <button
             type="submit"
-            className="w-full bg-mf-green hover:bg-mf-green-dark text-white font-medium py-3 px-6 rounded-xl transition-colors"
+            className="w-full bg-mf-green hover:bg-mf-green-dark active:bg-mf-green-darker text-white font-medium py-3.5 sm:py-3 px-6 rounded-xl transition-colors min-h-[48px]"
           >
             Get Recommendation
           </button>
@@ -301,13 +369,13 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Wax Result display */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-green/30 space-y-4 card-hover">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 card-hover">
+          <div className="flex items-start sm:items-center justify-between gap-2">
+            <h2 className="text-base sm:text-lg font-semibold text-white">
               Recommended Wax
             </h2>
-            <div className="text-right text-sm text-white/70">
-              {locationName && <div>{locationName}</div>}
+            <div className="text-right text-xs sm:text-sm text-white/70 flex-shrink-0">
+              {locationName && <div className="truncate max-w-[140px] sm:max-w-none">{locationName}</div>}
               <div>
                 {currentTemp.f}°F / {currentTemp.c}°C
               </div>
@@ -315,16 +383,16 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Wax color indicator + name */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className="w-16 h-16 rounded-xl shadow-lg flex-shrink-0"
+              className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl shadow-lg flex-shrink-0"
               style={{ backgroundColor: recommendation.colorHex }}
             />
             <div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-xl sm:text-2xl font-bold text-white">
                 {recommendation.color} Wax
               </div>
-              <div className="text-white/70">{recommendation.name}</div>
+              <div className="text-white/70 text-sm">{recommendation.name}</div>
             </div>
           </div>
 
@@ -351,16 +419,16 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             <h3 className="text-sm font-semibold text-white mb-2">
               Product Range
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {(Object.keys(productRangeLabels) as ProductRange[]).map(
                 (range) => (
                   <button
                     key={range}
                     onClick={() => setProductRange(range)}
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                    className={`py-2 px-2.5 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all min-h-[40px] ${
                       productRange === range
                         ? "bg-mf-green text-white ring-2 ring-mf-green/30 shadow-lg shadow-mf-green/10"
-                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
                     }`}
                   >
                     {productRangeLabels[range]}
@@ -395,12 +463,12 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Quiver Selector */}
       {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-mf-blue/30 space-y-4 card-hover">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 card-hover">
+          <div className="flex items-start sm:items-center justify-between gap-2">
+            <h2 className="text-base sm:text-lg font-semibold text-white">
               Quiver Selector
             </h2>
-            <span className="text-sm text-white/50">{quiver.condition}</span>
+            <span className="text-xs sm:text-sm text-white/50 flex-shrink-0">{quiver.condition}</span>
           </div>
 
           <p className="text-white/70 text-sm">{quiver.description}</p>
@@ -409,20 +477,20 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           <div className="flex gap-2">
             <button
               onClick={() => setDiscipline("ski")}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
                 discipline === "ski"
                   ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
               }`}
             >
               Skis
             </button>
             <button
               onClick={() => setDiscipline("snowboard")}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-xl text-sm font-medium transition-all min-h-[44px] ${
                 discipline === "snowboard"
                   ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80"
+                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
               }`}
             >
               Snowboards
@@ -434,17 +502,17 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             {quiverOptions.map((option) => (
               <div
                 key={option.name}
-                className="bg-white/5 rounded-xl p-4 space-y-2"
+                className="bg-white/5 rounded-xl p-3 sm:p-4 space-y-2"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-start sm:items-center justify-between gap-2">
                   <h3 className="text-white font-semibold text-sm">
                     {option.name}
                   </h3>
-                  <span className="text-mf-blue text-xs font-medium">
+                  <span className="text-mf-blue text-xs font-medium flex-shrink-0 text-right">
                     {option.bestFor}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <div className="text-white/50">
                     Length:{" "}
                     <span className="text-white/80">{option.length}</span>
