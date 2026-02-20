@@ -38,7 +38,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     c: number;
   } | null>(null);
   const [productRange, setProductRange] =
-    useState<ProductRange>("performance");
+    useState<ProductRange>("hotWax");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [locationName, setLocationName] = useState("");
