@@ -533,14 +533,21 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
             <ul className="space-y-1">
               {recommendation.products[productRange].map((product) => (
                 <li
-                  key={product}
+                  key={product.name}
                   className="text-white/70 text-sm flex items-center gap-2"
                 >
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ backgroundColor: recommendation.colorHex }}
                   />
-                  {product}
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-white transition-colors"
+                  >
+                    {product.name}
+                  </a>
                 </li>
               ))}
             </ul>

@@ -1,5 +1,10 @@
 export type ProductRange = "hotWax" | "raceWax" | "quickWax";
 
+export interface Product {
+  name: string;
+  url: string;
+}
+
 export interface WaxRecommendation {
   name: string;
   color: string;
@@ -7,7 +12,7 @@ export interface WaxRecommendation {
   tempRangeF: string;
   tempRangeC: string;
   description: string;
-  products: Record<ProductRange, string[]>;
+  products: Record<ProductRange, Product[]>;
   conditionNote?: string;
 }
 
@@ -27,9 +32,9 @@ const waxTypes: WaxRecommendation[] = [
     description:
       "Extremely cold, dry snow. A hard plant-based wax for maximum glide on frigid, abrasive crystals.",
     products: {
-      hotWax: ["mountainflow Hot Wax Cold (-5 to 15°F)"],
-      raceWax: ["mountainflow Race Wax Cold (-5 to 15°F)"],
-      quickWax: ["mountainflow Quick Wax Cool (15 to 30°F)"],
+      hotWax: [{ name: "Hot Wax Cold (-5 to 15°F)", url: "https://mountainflow.com/collections/performance-ski-wax/products/hot-wax?variant=34953499541665" }],
+      raceWax: [{ name: "Race Wax Cold (-5 to 15°F)", url: "https://mountainflow.com/collections/ski-race-wax/products/race-wax?variant=36168606843041" }],
+      quickWax: [{ name: "Quick Wax Cool (15 to 30°F)", url: "https://mountainflow.com/collections/backcountry-ski-wax/products/quick-wax-2-temps?variant=34954351280289" }],
     },
   },
   {
@@ -41,9 +46,9 @@ const waxTypes: WaxRecommendation[] = [
     description:
       "Cold, dry snow conditions. A medium-hard plant-based wax that performs well on packed powder and groomed trails.",
     products: {
-      hotWax: ["mountainflow Hot Wax Cool (10 to 25°F)"],
-      raceWax: ["mountainflow Race Wax Cool (10 to 25°F)"],
-      quickWax: ["mountainflow Quick Wax Cool (15 to 30°F)"],
+      hotWax: [{ name: "Hot Wax Cool (10 to 25°F)", url: "https://mountainflow.com/collections/performance-ski-wax/products/hot-wax?variant=34953499508897" }],
+      raceWax: [{ name: "Race Wax Cool (10 to 25°F)", url: "https://mountainflow.com/collections/ski-race-wax/products/race-wax?variant=36168606777505" }],
+      quickWax: [{ name: "Quick Wax Cool (15 to 30°F)", url: "https://mountainflow.com/collections/backcountry-ski-wax/products/quick-wax-2-temps?variant=34954351280289" }],
     },
   },
   {
@@ -55,14 +60,14 @@ const waxTypes: WaxRecommendation[] = [
     description:
       "Versatile, all-around plant-based wax that handles a wide range of conditions. Great when temperatures are variable.",
     products: {
-      hotWax: ["mountainflow Hot Wax All-Temp (8 to 30°F)"],
+      hotWax: [{ name: "Hot Wax All-Temp (8 to 30°F)", url: "https://mountainflow.com/collections/performance-ski-wax/products/hot-wax?variant=34953499443361" }],
       raceWax: [
-        "mountainflow Race Wax Cool (10 to 25°F)",
-        "mountainflow Race Wax Warm (20 to 36°F)",
+        { name: "Race Wax Cool (10 to 25°F)", url: "https://mountainflow.com/collections/ski-race-wax/products/race-wax?variant=36168606777505" },
+        { name: "Race Wax Warm (20 to 36°F)", url: "https://mountainflow.com/collections/ski-race-wax/products/race-wax?variant=36168606679201" },
       ],
       quickWax: [
-        "mountainflow Quick Wax Cool (15 to 30°F)",
-        "mountainflow Quick Wax Warm (25 to 40°F)",
+        { name: "Quick Wax Cool (15 to 30°F)", url: "https://mountainflow.com/collections/backcountry-ski-wax/products/quick-wax-2-temps?variant=34954351280289" },
+        { name: "Quick Wax Warm (25 to 40°F)", url: "https://mountainflow.com/collections/backcountry-ski-wax/products/quick-wax-2-temps?variant=34954351313057" },
       ],
     },
   },
@@ -75,9 +80,9 @@ const waxTypes: WaxRecommendation[] = [
     description:
       "Near or above freezing with wet, slushy snow. A soft plant-based wax that repels moisture and prevents suction.",
     products: {
-      hotWax: ["mountainflow Hot Wax Warm (20 to 36°F)"],
-      raceWax: ["mountainflow Race Wax Warm (20 to 36°F)"],
-      quickWax: ["mountainflow Quick Wax Warm (25 to 40°F)"],
+      hotWax: [{ name: "Hot Wax Warm (20 to 36°F)", url: "https://mountainflow.com/collections/performance-ski-wax/products/hot-wax?variant=34953499476129" }],
+      raceWax: [{ name: "Race Wax Warm (20 to 36°F)", url: "https://mountainflow.com/collections/ski-race-wax/products/race-wax?variant=36168606679201" }],
+      quickWax: [{ name: "Quick Wax Warm (25 to 40°F)", url: "https://mountainflow.com/collections/backcountry-ski-wax/products/quick-wax-2-temps?variant=34954351313057" }],
     },
   },
 ];
