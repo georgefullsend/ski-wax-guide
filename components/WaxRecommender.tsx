@@ -262,7 +262,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       {inputCollapsed && recommendation ? (
         <button
           onClick={() => setInputCollapsed(false)}
-          className="w-full bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-mf-blue/30 liquid-card card-hover text-left"
+          className="w-full bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-white/[0.12] liquid-card card-hover text-left"
         >
           <div className="flex items-center gap-2.5">
             {activeConditions && (
@@ -280,7 +280,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       ) : (
         <>
           {/* Auto-detect section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Auto-Detect Weather
             </h2>
@@ -301,7 +301,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Resort picker section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover relative z-30">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover relative z-30">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Pick a Resort
             </h2>
@@ -315,10 +315,10 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                 }}
                 onFocus={() => setShowResortDropdown(true)}
                 placeholder="Search resorts..."
-                className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+                className="w-full bg-white/10 border border-white/[0.12] rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
               />
               {showResortDropdown && (
-                <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
+                <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-white/[0.12] rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
                   {(() => {
                     const query = resortSearch.toLowerCase();
                     const filtered = resorts.filter((r) =>
@@ -414,7 +414,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Manual input section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Enter Temperature
             </h2>
@@ -426,12 +426,12 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                   value={tempInput}
                   onChange={(e) => setTempInput(e.target.value)}
                   placeholder={unit === "F" ? "e.g. 25" : "e.g. -4"}
-                  className="flex-1 bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+                  className="flex-1 bg-white/10 border border-white/[0.12] rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setUnit(unit === "F" ? "C" : "F")}
-                  className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-mf-blue/30 rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
+                  className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-white/[0.12] rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
                 >
                   °{unit}
                 </button>
@@ -456,7 +456,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Wax Result display — HERO position, above weather */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 liquid-card card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Recommended Wax
@@ -585,7 +585,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Quiver Selector */}
       {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 liquid-card card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Quiver Selector

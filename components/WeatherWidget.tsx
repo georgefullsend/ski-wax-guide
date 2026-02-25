@@ -26,7 +26,7 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
   const windLabel = getWindLabel(conditions.windSpeedMph);
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 liquid-card card-hover">
+    <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
       <h2 className="text-base sm:text-lg font-semibold text-white">
         {isTomorrow ? "Tomorrow's Forecast" : "Current Conditions"}
       </h2>
