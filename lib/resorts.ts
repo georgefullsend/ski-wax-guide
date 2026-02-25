@@ -4,6 +4,7 @@ export interface SkiResort {
   lat: number;
   lon: number;
   elevationFt: number; // base area elevation in feet
+  pass?: "ikon" | "epic" | "both" | "independent";
 }
 
 export const resorts: SkiResort[] = [
