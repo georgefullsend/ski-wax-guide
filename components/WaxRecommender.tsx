@@ -86,7 +86,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     ? tomorrowConditions
     : weatherConditions;
 
-  async function fetchWeatherByCoords(lat: number, lon: number, name: string) {
+  async function fetchWeatherByCoords(lat: number, lon: number, name: string, resortElevationFt?: number) {
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=2&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
     );
@@ -94,7 +94,14 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     const data = await res.json();
     const current = data.current;
 
-    const tempF: number = current.temperature_2m;
+    let tempF: number = current.temperature_2m;
+
+    // Elevation-based lapse rate adjustment (~-3.5°F per 1,000 ft)
+    if (resortElevationFt != null && data.elevation != null) {
+      const modelElevFt = data.elevation * 3.281;
+      tempF += ((resortElevationFt - modelElevFt) / 1000) * -3.5;
+    }
+
     const tempC = fahrenheitToCelsius(tempF);
 
     const conditions: WeatherConditions = {
@@ -111,10 +118,13 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
     // Build tomorrow's conditions from daily forecast (index 1)
     const daily = data.daily;
+    const elevAdjustF = (resortElevationFt != null && data.elevation != null)
+      ? ((resortElevationFt - data.elevation * 3.281) / 1000) * -3.5
+      : 0;
     if (daily && daily.temperature_2m_max?.length > 1) {
-      const tomorrowHighF: number = daily.temperature_2m_max[1];
+      const tomorrowHighF: number = daily.temperature_2m_max[1] + elevAdjustF;
       const tomorrowHighC = fahrenheitToCelsius(tomorrowHighF);
-      const tomorrowLowF: number = daily.temperature_2m_min[1];
+      const tomorrowLowF: number = daily.temperature_2m_min[1] + elevAdjustF;
 
       const tomorrow: WeatherConditions = {
         tempF: tomorrowHighF,
@@ -194,7 +204,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     setWeatherConditions(null);
 
     try {
-      await fetchWeatherByCoords(resort.lat, resort.lon, resort.name);
+      await fetchWeatherByCoords(resort.lat, resort.lon, resort.name, resort.elevationFt);
     } catch {
       setError(`Failed to fetch weather for ${resort.name}. Please try again.`);
     } finally {
