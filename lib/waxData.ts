@@ -1,9 +1,4 @@
-export type ProductRange =
-  | "performance"
-  | "race"
-  | "quick"
-  | "nonPetroleum"
-  | "nonFluorinated";
+export type ProductRange = "hotWax" | "raceWax" | "quickWax";
 
 export interface WaxRecommendation {
   name: string;
@@ -17,11 +12,9 @@ export interface WaxRecommendation {
 }
 
 export const productRangeLabels: Record<ProductRange, string> = {
-  performance: "Performance",
-  race: "Race",
-  quick: "Quick",
-  nonPetroleum: "Non-Petroleum",
-  nonFluorinated: "Non-Fluorinated",
+  hotWax: "Hot Wax",
+  raceWax: "Race Wax",
+  quickWax: "Quick Wax",
 };
 
 const waxTypes: WaxRecommendation[] = [
@@ -32,13 +25,11 @@ const waxTypes: WaxRecommendation[] = [
     tempRangeF: "Below 10°F",
     tempRangeC: "Below -12°C",
     description:
-      "Extremely cold conditions. Use a hard, cold-rated wax for dry, abrasive snow. These waxes have high fluorocarbon content for maximum glide on frigid crystals.",
+      "Extremely cold conditions with dry, abrasive snow. Use a hard, cold-rated plant-based wax for maximum glide on frigid crystals.",
     products: {
-      performance: ["Swix CH4X Cold", "Toko NF Hot Wax Green", "Dominator Zoom Hyper Cold"],
-      race: ["Swix HF4X Cold", "Toko HF Hot Wax Green", "Dominator Race Polar"],
-      quick: ["Swix F4 Easy Glide", "Toko Express 2.0", "Dominator Slick"],
-      nonPetroleum: ["mountainflow Hot Wax Cold", "Purl Ultra Cold", "DPS Phantom Cold"],
-      nonFluorinated: ["Swix TS4 Black Cold", "Toko NF Hot Wax Green", "Rex Blue"],
+      hotWax: ["mountainflow Hot Wax Cold (-5 to 15°F)"],
+      raceWax: ["mountainflow Race Wax Cold (-5 to 15°F)"],
+      quickWax: ["mountainflow Quick Wax Cool (15 to 30°F)"],
     },
   },
   {
@@ -48,13 +39,18 @@ const waxTypes: WaxRecommendation[] = [
     tempRangeF: "10°F to 23°F",
     tempRangeC: "-12°C to -5°C",
     description:
-      "Cold, dry snow conditions. A medium-hard wax that performs well on packed powder and groomed trails in cold weather.",
+      "Cold, dry snow conditions. A medium-hard plant-based wax that performs well on packed powder and groomed trails in cold weather.",
     products: {
-      performance: ["Swix CH6X Blue", "Toko NF Hot Wax Blue", "Dominator Zoom Mid"],
-      race: ["Swix HF6X Blue", "Toko HF Hot Wax Blue", "Dominator Race Cold"],
-      quick: ["Swix F4 Easy Glide", "Toko Express 2.0", "Dominator Slick"],
-      nonPetroleum: ["mountainflow Hot Wax Cold", "Purl Cold", "DPS Phantom Cold"],
-      nonFluorinated: ["Swix TS6 Black", "Toko NF Hot Wax Blue", "Rex Blue Special"],
+      hotWax: [
+        "mountainflow Hot Wax Cold (-5 to 15°F)",
+        "mountainflow Hot Wax Cool (10 to 25°F)",
+        "mountainflow Hot Wax All-Temp (8 to 30°F)",
+      ],
+      raceWax: [
+        "mountainflow Race Wax Cold (-5 to 15°F)",
+        "mountainflow Race Wax Cool (10 to 25°F)",
+      ],
+      quickWax: ["mountainflow Quick Wax Cool (15 to 30°F)"],
     },
   },
   {
@@ -64,13 +60,20 @@ const waxTypes: WaxRecommendation[] = [
     tempRangeF: "23°F to 32°F",
     tempRangeC: "-5°C to 0°C",
     description:
-      "Transitional temperatures around freezing. A versatile, all-around wax that handles a mix of snow conditions well.",
+      "Transitional temperatures around freezing. A versatile, all-around plant-based wax that handles a mix of snow conditions well.",
     products: {
-      performance: ["Swix CH7X Violet", "Toko NF Hot Wax Red", "Dominator Zoom"],
-      race: ["Swix HF7X Violet", "Toko HF Hot Wax Red", "Dominator Race Mid"],
-      quick: ["Swix F4 Easy Glide", "Toko Express 2.0", "Dominator Slick"],
-      nonPetroleum: ["mountainflow Hot Wax All-Temp", "Purl All-Temp", "DPS Phantom All-Temp"],
-      nonFluorinated: ["Swix TS7 Violet", "Toko NF Hot Wax Red", "Rex Glide Violet"],
+      hotWax: [
+        "mountainflow Hot Wax All-Temp (8 to 30°F)",
+        "mountainflow Hot Wax Cool (10 to 25°F)",
+      ],
+      raceWax: [
+        "mountainflow Race Wax Cool (10 to 25°F)",
+        "mountainflow Race Wax Warm (20 to 36°F)",
+      ],
+      quickWax: [
+        "mountainflow Quick Wax Cool (15 to 30°F)",
+        "mountainflow Quick Wax Warm (25 to 40°F)",
+      ],
     },
   },
   {
@@ -80,13 +83,11 @@ const waxTypes: WaxRecommendation[] = [
     tempRangeF: "32°F to 41°F",
     tempRangeC: "0°C to 5°C",
     description:
-      "Above freezing with wet, slushy snow. Use a soft wax that repels moisture and prevents suction on warm snow.",
+      "Above freezing with wet, slushy snow. A soft plant-based wax that repels moisture and prevents suction on warm snow.",
     products: {
-      performance: ["Swix CH8X Red", "Toko NF Hot Wax Yellow", "Dominator Zoom Hyper Warm"],
-      race: ["Swix HF8X Red", "Toko HF Hot Wax Yellow", "Dominator Race Warm"],
-      quick: ["Swix F4 Liquid Easy Glide", "Toko Express Maxi", "Dominator Slick Warm"],
-      nonPetroleum: ["mountainflow Hot Wax Warm", "Purl Warm", "DPS Phantom Warm"],
-      nonFluorinated: ["Swix TS8 Red", "Toko NF Hot Wax Yellow", "Rex Glide Warm"],
+      hotWax: ["mountainflow Hot Wax Warm (20 to 36°F)"],
+      raceWax: ["mountainflow Race Wax Warm (20 to 36°F)"],
+      quickWax: ["mountainflow Quick Wax Warm (25 to 40°F)"],
     },
   },
   {
@@ -96,13 +97,11 @@ const waxTypes: WaxRecommendation[] = [
     tempRangeF: "Above 41°F",
     tempRangeC: "Above 5°C",
     description:
-      "Spring-like, very warm conditions with saturated, wet snow. Use the softest wax available to maximize water repellency and glide.",
+      "Spring-like, very warm conditions with saturated, wet snow. Use the warmest plant-based wax for maximum water repellency and glide.",
     products: {
-      performance: ["Swix CH10X Yellow", "Toko NF Hot Wax Yellow", "Dominator Zoom Hyper Wet"],
-      race: ["Swix HF10X Yellow", "Toko HF Hot Wax Yellow", "Dominator Race Spring"],
-      quick: ["Swix F4 Liquid Easy Glide", "Toko Express Maxi", "Dominator Slick Warm"],
-      nonPetroleum: ["mountainflow Hot Wax Warm", "Purl Spring", "DPS Phantom Warm"],
-      nonFluorinated: ["Swix TS10 Yellow", "Toko NF Hot Wax Yellow", "Rex Glide Yellow"],
+      hotWax: ["mountainflow Hot Wax Warm (20 to 36°F)"],
+      raceWax: ["mountainflow Race Wax Warm (20 to 36°F)"],
+      quickWax: ["mountainflow Quick Wax Warm (25 to 40°F)"],
     },
   },
 ];

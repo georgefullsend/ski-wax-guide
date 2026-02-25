@@ -38,7 +38,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     c: number;
   } | null>(null);
   const [productRange, setProductRange] =
-    useState<ProductRange>("performance");
+    useState<ProductRange>("hotWax");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [locationName, setLocationName] = useState("");
@@ -86,7 +86,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     ? tomorrowConditions
     : weatherConditions;
 
-  async function fetchWeatherByCoords(lat: number, lon: number, name: string) {
+  async function fetchWeatherByCoords(lat: number, lon: number, name: string, resortElevationFt?: number) {
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=2&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
     );
@@ -94,7 +94,14 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     const data = await res.json();
     const current = data.current;
 
-    const tempF: number = current.temperature_2m;
+    let tempF: number = current.temperature_2m;
+
+    // Elevation-based lapse rate adjustment (~-3.5°F per 1,000 ft)
+    if (resortElevationFt != null && data.elevation != null) {
+      const modelElevFt = data.elevation * 3.281;
+      tempF += ((resortElevationFt - modelElevFt) / 1000) * -3.5;
+    }
+
     const tempC = fahrenheitToCelsius(tempF);
 
     const conditions: WeatherConditions = {
@@ -111,10 +118,13 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
     // Build tomorrow's conditions from daily forecast (index 1)
     const daily = data.daily;
+    const elevAdjustF = (resortElevationFt != null && data.elevation != null)
+      ? ((resortElevationFt - data.elevation * 3.281) / 1000) * -3.5
+      : 0;
     if (daily && daily.temperature_2m_max?.length > 1) {
-      const tomorrowHighF: number = daily.temperature_2m_max[1];
+      const tomorrowHighF: number = daily.temperature_2m_max[1] + elevAdjustF;
       const tomorrowHighC = fahrenheitToCelsius(tomorrowHighF);
-      const tomorrowLowF: number = daily.temperature_2m_min[1];
+      const tomorrowLowF: number = daily.temperature_2m_min[1] + elevAdjustF;
 
       const tomorrow: WeatherConditions = {
         tempF: tomorrowHighF,
@@ -194,7 +204,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     setWeatherConditions(null);
 
     try {
-      await fetchWeatherByCoords(resort.lat, resort.lon, resort.name);
+      await fetchWeatherByCoords(resort.lat, resort.lon, resort.name, resort.elevationFt);
     } catch {
       setError(`Failed to fetch weather for ${resort.name}. Please try again.`);
     } finally {
@@ -252,7 +262,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       {inputCollapsed && recommendation ? (
         <button
           onClick={() => setInputCollapsed(false)}
-          className="w-full bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-mf-blue/30 liquid-card card-hover text-left"
+          className="w-full bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-5 flex items-center justify-between border border-white/[0.12] liquid-card card-hover text-left"
         >
           <div className="flex items-center gap-2.5">
             {activeConditions && (
@@ -270,7 +280,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       ) : (
         <>
           {/* Auto-detect section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Auto-Detect Weather
             </h2>
@@ -291,7 +301,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Resort picker section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover relative z-30">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover relative z-30">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Pick a Resort
             </h2>
@@ -305,10 +315,10 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                 }}
                 onFocus={() => setShowResortDropdown(true)}
                 placeholder="Search resorts..."
-                className="w-full bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+                className="w-full bg-white/10 border border-white/[0.12] rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
               />
               {showResortDropdown && (
-                <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-mf-blue/30 rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
+                <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-white/[0.12] rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
                   {(() => {
                     const query = resortSearch.toLowerCase();
                     const filtered = resorts.filter((r) =>
@@ -404,7 +414,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
           </div>
 
           {/* Manual input section */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 liquid-card card-hover">
+          <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] liquid-card card-hover">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-3">
               Enter Temperature
             </h2>
@@ -416,12 +426,12 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                   value={tempInput}
                   onChange={(e) => setTempInput(e.target.value)}
                   placeholder={unit === "F" ? "e.g. 25" : "e.g. -4"}
-                  className="flex-1 bg-white/10 border border-mf-blue/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
+                  className="flex-1 bg-white/10 border border-white/[0.12] rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-mf-blue focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setUnit(unit === "F" ? "C" : "F")}
-                  className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-mf-blue/30 rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
+                  className="bg-mf-blue/20 hover:bg-mf-blue/30 active:bg-mf-blue/40 border border-white/[0.12] rounded-xl px-4 py-3 text-white font-medium transition-colors min-w-[60px] min-h-[48px]"
                 >
                   °{unit}
                 </button>
@@ -446,7 +456,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Wax Result display — HERO position, above weather */}
       {recommendation && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-green/30 space-y-3 sm:space-y-4 liquid-card card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Recommended Wax
@@ -575,7 +585,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
       {/* Quiver Selector */}
       {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-mf-blue/30 space-y-3 sm:space-y-4 liquid-card card-hover">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
           <div className="flex items-start sm:items-center justify-between gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-white">
               Quiver Selector

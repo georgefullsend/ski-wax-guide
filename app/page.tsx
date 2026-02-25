@@ -13,12 +13,7 @@ export default function Home() {
     <>
       <WeatherBackground conditions={weatherConditions} />
       <main className="min-h-screen flex flex-col items-center px-3 sm:px-4 py-6 sm:py-12 relative">
-        {/* Liquid morphism blob accents */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 -left-20 w-64 h-64 bg-mf-blue/8 rounded-full blur-[80px]" />
-          <div className="absolute bottom-40 -right-16 w-48 h-48 bg-mf-green/6 rounded-full blur-[80px]" />
-        </div>
-        <div className="w-full max-w-xl mx-auto bg-black/40 backdrop-blur-md rounded-[22px] sm:rounded-[28px] p-4 sm:p-8 border border-white/10 liquid-card">
+        <div className="w-full max-w-xl mx-auto bg-black/40 backdrop-blur-md rounded-[22px] sm:rounded-[28px] p-4 sm:p-8 border border-white/[0.12] liquid-card">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white text-glow mb-2 sm:mb-3">
               Ski Wax Guide
