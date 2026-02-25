@@ -19,13 +19,13 @@ export const productRangeLabels: Record<ProductRange, string> = {
 
 const waxTypes: WaxRecommendation[] = [
   {
-    name: "Polar / Extra Cold",
+    name: "Cold",
     color: "Green",
-    colorHex: "#22c55e",
-    tempRangeF: "Below 10°F",
-    tempRangeC: "Below -12°C",
+    colorHex: "#6fcf6a",
+    tempRangeF: "-5°F to 15°F",
+    tempRangeC: "-21°C to -9°C",
     description:
-      "Extremely cold conditions with dry, abrasive snow. Use a hard, cold-rated plant-based wax for maximum glide on frigid crystals.",
+      "Extremely cold, dry snow. A hard plant-based wax for maximum glide on frigid, abrasive crystals.",
     products: {
       hotWax: ["mountainflow Hot Wax Cold (-5 to 15°F)"],
       raceWax: ["mountainflow Race Wax Cold (-5 to 15°F)"],
@@ -33,39 +33,29 @@ const waxTypes: WaxRecommendation[] = [
     },
   },
   {
-    name: "Cold",
+    name: "Cool",
     color: "Blue",
     colorHex: "#3b82f6",
-    tempRangeF: "10°F to 23°F",
-    tempRangeC: "-12°C to -5°C",
+    tempRangeF: "10°F to 25°F",
+    tempRangeC: "-12°C to -4°C",
     description:
-      "Cold, dry snow conditions. A medium-hard plant-based wax that performs well on packed powder and groomed trails in cold weather.",
+      "Cold, dry snow conditions. A medium-hard plant-based wax that performs well on packed powder and groomed trails.",
     products: {
-      hotWax: [
-        "mountainflow Hot Wax Cold (-5 to 15°F)",
-        "mountainflow Hot Wax Cool (10 to 25°F)",
-        "mountainflow Hot Wax All-Temp (8 to 30°F)",
-      ],
-      raceWax: [
-        "mountainflow Race Wax Cold (-5 to 15°F)",
-        "mountainflow Race Wax Cool (10 to 25°F)",
-      ],
+      hotWax: ["mountainflow Hot Wax Cool (10 to 25°F)"],
+      raceWax: ["mountainflow Race Wax Cool (10 to 25°F)"],
       quickWax: ["mountainflow Quick Wax Cool (15 to 30°F)"],
     },
   },
   {
-    name: "Medium",
-    color: "Violet",
-    colorHex: "#8b5cf6",
-    tempRangeF: "23°F to 32°F",
-    tempRangeC: "-5°C to 0°C",
+    name: "All-Temp",
+    color: "Yellow",
+    colorHex: "#eab308",
+    tempRangeF: "8°F to 30°F",
+    tempRangeC: "-13°C to -1°C",
     description:
-      "Transitional temperatures around freezing. A versatile, all-around plant-based wax that handles a mix of snow conditions well.",
+      "Versatile, all-around plant-based wax that handles a wide range of conditions. Great when temperatures are variable.",
     products: {
-      hotWax: [
-        "mountainflow Hot Wax All-Temp (8 to 30°F)",
-        "mountainflow Hot Wax Cool (10 to 25°F)",
-      ],
+      hotWax: ["mountainflow Hot Wax All-Temp (8 to 30°F)"],
       raceWax: [
         "mountainflow Race Wax Cool (10 to 25°F)",
         "mountainflow Race Wax Warm (20 to 36°F)",
@@ -80,24 +70,10 @@ const waxTypes: WaxRecommendation[] = [
     name: "Warm",
     color: "Red",
     colorHex: "#ef4444",
-    tempRangeF: "32°F to 41°F",
-    tempRangeC: "0°C to 5°C",
+    tempRangeF: "20°F to 36°F",
+    tempRangeC: "-7°C to 2°C",
     description:
-      "Above freezing with wet, slushy snow. A soft plant-based wax that repels moisture and prevents suction on warm snow.",
-    products: {
-      hotWax: ["mountainflow Hot Wax Warm (20 to 36°F)"],
-      raceWax: ["mountainflow Race Wax Warm (20 to 36°F)"],
-      quickWax: ["mountainflow Quick Wax Warm (25 to 40°F)"],
-    },
-  },
-  {
-    name: "Very Warm",
-    color: "Yellow",
-    colorHex: "#eab308",
-    tempRangeF: "Above 41°F",
-    tempRangeC: "Above 5°C",
-    description:
-      "Spring-like, very warm conditions with saturated, wet snow. Use the warmest plant-based wax for maximum water repellency and glide.",
+      "Near or above freezing with wet, slushy snow. A soft plant-based wax that repels moisture and prevents suction.",
     products: {
       hotWax: ["mountainflow Hot Wax Warm (20 to 36°F)"],
       raceWax: ["mountainflow Race Wax Warm (20 to 36°F)"],
@@ -111,11 +87,10 @@ export function getWaxRecommendation(
   conditions?: import("./weatherTypes").WeatherConditions
 ): WaxRecommendation {
   let base: WaxRecommendation;
-  if (tempF < 10) base = waxTypes[0];
-  else if (tempF < 23) base = waxTypes[1];
-  else if (tempF < 32) base = waxTypes[2];
-  else if (tempF < 41) base = waxTypes[3];
-  else base = waxTypes[4];
+  if (tempF < 8) base = waxTypes[0];       // Cold
+  else if (tempF < 18) base = waxTypes[1];  // Cool
+  else if (tempF < 26) base = waxTypes[2];  // All-Temp
+  else base = waxTypes[3];                  // Warm
 
   if (!conditions) return base;
 
