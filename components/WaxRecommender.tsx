@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   getWaxRecommendation,
   celsiusToFahrenheit,
@@ -43,6 +43,7 @@ export default function WaxRecommender() {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showForecast, setShowForecast] = useState(false);
   const [inputCollapsed, setInputCollapsed] = useState(false);
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -105,14 +106,13 @@ export default function WaxRecommender() {
       humidity: current.relative_humidity_2m,
     };
 
-    // Build 3-day forecast from daily data
+    // Build 3-day forecast (indices 1-3: tomorrow onward)
     const daily = data.daily;
     const elevAdjustF = (resortElevationFt != null && data.elevation != null)
       ? ((resortElevationFt - data.elevation * 3.281) / 1000) * -3.5
       : 0;
-    // Build 3-day forecast from daily data (indices 1-3: tomorrow onward)
     const days: ForecastDay[] = [];
-    if (daily && daily.temperature_2m_max?.length >= 4) {
+    if (daily && daily.time?.length >= 4 && daily.temperature_2m_max?.length >= 4) {
       for (let i = 1; i <= 3; i++) {
         const highF = daily.temperature_2m_max[i] + elevAdjustF;
         const lowF = daily.temperature_2m_min[i] + elevAdjustF;
@@ -158,6 +158,8 @@ export default function WaxRecommender() {
   }
 
   async function handleAutoDetect() {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
     setError("");
     setLoading(true);
     setLocationName("");
@@ -166,6 +168,7 @@ export default function WaxRecommender() {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser.");
       setLoading(false);
+      fetchingRef.current = false;
       return;
     }
 
@@ -182,6 +185,7 @@ export default function WaxRecommender() {
           setError("Failed to fetch weather data. Please try manual input.");
         } finally {
           setLoading(false);
+          fetchingRef.current = false;
         }
       },
       () => {
@@ -189,6 +193,7 @@ export default function WaxRecommender() {
           "Location access denied. Please allow location access or enter temperature manually."
         );
         setLoading(false);
+        fetchingRef.current = false;
       }
     );
   }
@@ -233,6 +238,21 @@ export default function WaxRecommender() {
     setInputCollapsed(true);
   }
 
+
+  const filteredResorts = useMemo(() => {
+    const query = resortSearch.toLowerCase();
+    return resorts.filter((r) => r.name.toLowerCase().includes(query));
+  }, [resortSearch]);
+
+  const favoriteResorts = useMemo(
+    () => filteredResorts.filter((r) => favorites.has(r.name)),
+    [filteredResorts, favorites]
+  );
+
+  const resortRegions = useMemo(
+    () => [...new Set(filteredResorts.map((r) => r.region))],
+    [filteredResorts]
+  );
 
   return (
     <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
@@ -298,88 +318,89 @@ export default function WaxRecommender() {
               />
               {showResortDropdown && (
                 <div className="absolute z-40 mt-2 w-full bg-slate-800/95 backdrop-blur-md border border-white/[0.12] rounded-xl max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl overscroll-contain -webkit-overflow-scrolling-touch">
-                  {(() => {
-                    const query = resortSearch.toLowerCase();
-                    const filtered = resorts.filter((r) =>
-                      r.name.toLowerCase().includes(query)
-                    );
-                    if (filtered.length === 0) {
-                      return (
-                        <div className="px-4 py-3 text-white/40 text-sm">
-                          No resorts found
+                  {filteredResorts.length === 0 ? (
+                    <div className="px-4 py-3 text-white/40 text-sm">
+                      No resorts found
+                    </div>
+                  ) : (
+                    <>
+                      {favoriteResorts.length > 0 && (
+                        <div>
+                          <div className="px-4 py-2 text-xs font-semibold text-yellow-400/70 uppercase tracking-wider sticky top-0 bg-slate-800/95 flex items-center gap-1">
+                            <span>&#9733;</span> Favorites
+                          </div>
+                          {favoriteResorts.map((resort) => (
+                            <div
+                              key={resort.name}
+                              className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); toggleFavorite(resort.name); }}
+                                className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                aria-label={favorites.has(resort.name) ? `Unfavorite ${resort.name}` : `Favorite ${resort.name}`}
+                              >
+                                {favorites.has(resort.name) ? (
+                                  <span className="text-yellow-400">&#9733;</span>
+                                ) : (
+                                  <span className="text-white/30 hover:text-yellow-400/60">&#9734;</span>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleResortSelect(resort)}
+                                className="flex-1 text-left pr-4 py-3 text-sm text-white/80 hover:text-white active:text-white transition-colors min-h-[44px] flex items-center"
+                              >
+                                {resort.name}
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      );
-                    }
-
-                    const favoriteResorts = filtered.filter((r) =>
-                      favorites.has(r.name)
-                    );
-                    const regions = [...new Set(filtered.map((r) => r.region))];
-
-                    const renderResortRow = (resort: SkiResort) => (
-                      <div
-                        key={resort.name}
-                        className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
-                      >
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(resort.name);
-                          }}
-                          className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label={
-                            favorites.has(resort.name)
-                              ? `Unfavorite ${resort.name}`
-                              : `Favorite ${resort.name}`
-                          }
-                        >
-                          {favorites.has(resort.name) ? (
-                            <span className="text-yellow-400">&#9733;</span>
-                          ) : (
-                            <span className="text-white/30 hover:text-yellow-400/60">&#9734;</span>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleResortSelect(resort)}
-                          className="flex-1 text-left pr-4 py-3 text-sm text-white/80 hover:text-white active:text-white transition-colors min-h-[44px] flex items-center"
-                        >
-                          {resort.name}
-                        </button>
-                      </div>
-                    );
-
-                    return (
-                      <>
-                        {favoriteResorts.length > 0 && (
-                          <div>
-                            <div className="px-4 py-2 text-xs font-semibold text-yellow-400/70 uppercase tracking-wider sticky top-0 bg-slate-800/95 flex items-center gap-1">
-                              <span>&#9733;</span> Favorites
-                            </div>
-                            {favoriteResorts.map(renderResortRow)}
+                      )}
+                      {resortRegions.map((region) => (
+                        <div key={region}>
+                          <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
+                            {region}
                           </div>
-                        )}
-                        {regions.map((region) => (
-                          <div key={region}>
-                            <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
-                              {region}
-                            </div>
-                            {filtered
-                              .filter((r) => r.region === region)
-                              .map(renderResortRow)}
-                          </div>
-                        ))}
-                      </>
-                    );
-                  })()}
+                          {filteredResorts
+                            .filter((r) => r.region === region)
+                            .map((resort) => (
+                              <div
+                                key={resort.name}
+                                className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); toggleFavorite(resort.name); }}
+                                  className="pl-4 pr-2 py-3 text-base sm:text-sm flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                  aria-label={favorites.has(resort.name) ? `Unfavorite ${resort.name}` : `Favorite ${resort.name}`}
+                                >
+                                  {favorites.has(resort.name) ? (
+                                    <span className="text-yellow-400">&#9733;</span>
+                                  ) : (
+                                    <span className="text-white/30 hover:text-yellow-400/60">&#9734;</span>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleResortSelect(resort)}
+                                  className="flex-1 text-left pr-4 py-3 text-sm text-white/80 hover:text-white active:text-white transition-colors min-h-[44px] flex items-center"
+                                >
+                                  {resort.name}
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
             {/* Click outside to close */}
             {showResortDropdown && (
               <div
-                className="fixed inset-0 z-30"
+                className="fixed inset-0 z-[35]"
                 onClick={() => setShowResortDropdown(false)}
               />
             )}
