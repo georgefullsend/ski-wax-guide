@@ -536,10 +536,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
                   key={product.name}
                   className="text-white/70 text-sm flex items-center gap-2"
                 >
-                  <span
-                    className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: recommendation.colorHex }}
-                  />
+                  <span className="text-white/40 flex-shrink-0">›</span>
                   <a
                     href={product.url}
                     target="_blank"
