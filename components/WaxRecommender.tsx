@@ -76,7 +76,7 @@ export default function WaxRecommender() {
 
   async function fetchWeatherByCoords(lat: number, lon: number, name: string, resortElevationFt?: number) {
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum,time&forecast_days=3&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=3&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
     );
     if (!res.ok) throw new Error("Weather API request failed");
     const data = await res.json();
