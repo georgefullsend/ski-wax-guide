@@ -10,11 +10,6 @@ import {
   type ProductRange,
 } from "@/lib/waxData";
 import {
-  getQuiverRecommendation,
-  type ConditionQuiver,
-  type Discipline,
-} from "@/lib/quiverData";
-import {
   type WeatherConditions,
   calcEffectiveTemp,
   getWeatherIcon,
@@ -22,17 +17,11 @@ import {
 import { resorts, type SkiResort } from "@/lib/resorts";
 import WeatherWidget from "./WeatherWidget";
 
-interface WaxRecommenderProps {
-  onWeatherChange?: (conditions: WeatherConditions | null) => void;
-}
-
-export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps) {
+export default function WaxRecommender() {
   const [tempInput, setTempInput] = useState("");
   const [unit, setUnit] = useState<"F" | "C">("F");
   const [recommendation, setRecommendation] =
     useState<WaxRecommendation | null>(null);
-  const [quiver, setQuiver] = useState<ConditionQuiver | null>(null);
-  const [discipline, setDiscipline] = useState<Discipline>("ski");
   const [currentTemp, setCurrentTemp] = useState<{
     f: number;
     c: number;
@@ -79,7 +68,6 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
   function applyResults(tempF: number, conditions?: WeatherConditions) {
     const effectiveF = conditions ? calcEffectiveTemp(conditions) : tempF;
     setRecommendation(getWaxRecommendation(effectiveF, conditions));
-    setQuiver(getQuiverRecommendation(effectiveF));
   }
 
   const activeConditions = forecastMode === "tomorrow" && tomorrowConditions
@@ -147,7 +135,7 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
 
     setForecastMode("current");
     setWeatherConditions(conditions);
-    onWeatherChange?.(conditions);
+
     setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
     applyResults(tempF, conditions);
     setTempInput(
@@ -219,13 +207,11 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
       const tempC = fahrenheitToCelsius(tempF);
       setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
       applyResults(tempF, tomorrowConditions);
-      onWeatherChange?.(tomorrowConditions);
     } else if (mode === "current" && weatherConditions) {
       const tempF = weatherConditions.tempF;
       const tempC = fahrenheitToCelsius(tempF);
       setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
       applyResults(tempF, weatherConditions);
-      onWeatherChange?.(weatherConditions);
     }
   }
 
@@ -236,7 +222,6 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     setTomorrowConditions(null);
     setTomorrowTempLow(null);
     setForecastMode("current");
-    onWeatherChange?.(null);
 
     const value = parseFloat(tempInput);
     if (isNaN(value)) {
@@ -253,7 +238,6 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
     setInputCollapsed(true);
   }
 
-  const quiverOptions = quiver ? quiver[discipline] : [];
 
   return (
     <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
@@ -587,80 +571,6 @@ export default function WaxRecommender({ onWeatherChange }: WaxRecommenderProps)
         </>
       )}
 
-      {/* Quiver Selector */}
-      {quiver && currentTemp && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
-          <div className="flex items-start sm:items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
-              Quiver Selector
-            </h2>
-            <span className="text-xs sm:text-sm text-white/50 flex-shrink-0">{quiver.condition}</span>
-          </div>
-
-          <p className="text-white/70 text-sm">{quiver.description}</p>
-
-          {/* Ski / Snowboard toggle */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDiscipline("ski")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
-                discipline === "ski"
-                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-              }`}
-            >
-              Skis
-            </button>
-            <button
-              onClick={() => setDiscipline("snowboard")}
-              className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
-                discipline === "snowboard"
-                  ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-              }`}
-            >
-              Snowboards
-            </button>
-          </div>
-
-          {/* Quiver options */}
-          <div className="space-y-3">
-            {quiverOptions.map((option) => (
-              <div
-                key={option.name}
-                className="bg-white/5 rounded-xl p-3 sm:p-4 space-y-2"
-              >
-                <div className="flex items-start sm:items-center justify-between gap-2">
-                  <h3 className="text-white font-semibold text-sm">
-                    {option.name}
-                  </h3>
-                  <span className="text-mf-blue text-xs font-medium flex-shrink-0 text-right">
-                    {option.bestFor}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <div className="text-white/50">
-                    Length:{" "}
-                    <span className="text-white/80">{option.length}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Waist:{" "}
-                    <span className="text-white/80">{option.waistWidth}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Shape:{" "}
-                    <span className="text-white/80">{option.shape}</span>
-                  </div>
-                  <div className="text-white/50">
-                    Camber:{" "}
-                    <span className="text-white/80">{option.camber}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
