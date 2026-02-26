@@ -523,8 +523,6 @@ export default function WaxRecommender() {
                   <span className="text-white font-semibold flex-shrink-0">›</span>
                   <a
                     href={product.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="underline underline-offset-2 hover:text-white transition-colors"
                   >
                     {product.name}
