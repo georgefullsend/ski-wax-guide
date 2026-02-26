@@ -11,11 +11,14 @@ import {
 } from "@/lib/waxData";
 import {
   type WeatherConditions,
+  type ForecastDay,
   calcEffectiveTemp,
   getWeatherIcon,
+  getDayLabel,
 } from "@/lib/weatherTypes";
 import { resorts, type SkiResort } from "@/lib/resorts";
 import WeatherWidget from "./WeatherWidget";
+import ForecastCards from "./ForecastCards";
 
 export default function WaxRecommender() {
   const [tempInput, setTempInput] = useState("");
@@ -36,9 +39,8 @@ export default function WaxRecommender() {
   const [resortSearch, setResortSearch] = useState("");
   const [showResortDropdown, setShowResortDropdown] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [forecastMode, setForecastMode] = useState<"current" | "tomorrow">("current");
-  const [tomorrowConditions, setTomorrowConditions] = useState<WeatherConditions | null>(null);
-  const [tomorrowTempLow, setTomorrowTempLow] = useState<number | null>(null);
+  const [forecastDays, setForecastDays] = useState<ForecastDay[]>([]);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [inputCollapsed, setInputCollapsed] = useState(false);
 
   useEffect(() => {
@@ -70,13 +72,11 @@ export default function WaxRecommender() {
     setRecommendation(getWaxRecommendation(effectiveF, conditions));
   }
 
-  const activeConditions = forecastMode === "tomorrow" && tomorrowConditions
-    ? tomorrowConditions
-    : weatherConditions;
+  const activeConditions = weatherConditions;
 
   async function fetchWeatherByCoords(lat: number, lon: number, name: string, resortElevationFt?: number) {
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=2&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,weather_code,is_day,precipitation,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum,time&forecast_days=3&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit`
     );
     if (!res.ok) throw new Error("Weather API request failed");
     const data = await res.json();
@@ -104,36 +104,43 @@ export default function WaxRecommender() {
       humidity: current.relative_humidity_2m,
     };
 
-    // Build tomorrow's conditions from daily forecast (index 1)
+    // Build 3-day forecast from daily data
     const daily = data.daily;
     const elevAdjustF = (resortElevationFt != null && data.elevation != null)
       ? ((resortElevationFt - data.elevation * 3.281) / 1000) * -3.5
       : 0;
-    if (daily && daily.temperature_2m_max?.length > 1) {
-      const tomorrowHighF: number = daily.temperature_2m_max[1] + elevAdjustF;
-      const tomorrowHighC = fahrenheitToCelsius(tomorrowHighF);
-      const tomorrowLowF: number = daily.temperature_2m_min[1] + elevAdjustF;
+    const days: ForecastDay[] = [];
+    if (daily && daily.temperature_2m_max?.length >= 3) {
+      for (let i = 0; i < 3; i++) {
+        const highF = daily.temperature_2m_max[i] + elevAdjustF;
+        const lowF = daily.temperature_2m_min[i] + elevAdjustF;
+        const highC = fahrenheitToCelsius(highF);
 
-      const tomorrow: WeatherConditions = {
-        tempF: tomorrowHighF,
-        tempC: tomorrowHighC,
-        windSpeedMph: daily.wind_speed_10m_max[1] ?? 0,
-        windDirection: daily.wind_direction_10m_dominant[1] ?? 0,
-        cloudCover: 50, // not available in daily
-        weatherCode: daily.weather_code[1] ?? 0,
-        isDay: true, // forecast is for daytime skiing
-        precipitation: daily.precipitation_sum[1] ?? 0,
-        humidity: 50, // not available in daily
-      };
+        const dayConditions: WeatherConditions = {
+          tempF: highF,
+          tempC: highC,
+          windSpeedMph: daily.wind_speed_10m_max[i] ?? 0,
+          windDirection: daily.wind_direction_10m_dominant[i] ?? 0,
+          cloudCover: i === 0 ? current.cloud_cover : 50,
+          weatherCode: daily.weather_code[i] ?? 0,
+          isDay: true,
+          precipitation: daily.precipitation_sum[i] ?? 0,
+          humidity: i === 0 ? current.relative_humidity_2m : 50,
+        };
 
-      setTomorrowConditions(tomorrow);
-      setTomorrowTempLow(Math.round(tomorrowLowF));
-    } else {
-      setTomorrowConditions(null);
-      setTomorrowTempLow(null);
+        const effectiveF = calcEffectiveTemp(dayConditions);
+        days.push({
+          date: daily.time[i],
+          dayLabel: getDayLabel(daily.time[i], i),
+          conditions: dayConditions,
+          tempHighF: Math.round(highF),
+          tempLowF: Math.round(lowF),
+          waxRecommendation: getWaxRecommendation(effectiveF, dayConditions),
+        });
+      }
     }
-
-    setForecastMode("current");
+    setForecastDays(days);
+    setSelectedDayIndex(0);
     setWeatherConditions(conditions);
 
     setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
@@ -200,28 +207,12 @@ export default function WaxRecommender() {
     }
   }
 
-  function switchForecastMode(mode: "current" | "tomorrow") {
-    setForecastMode(mode);
-    if (mode === "tomorrow" && tomorrowConditions) {
-      const tempF = tomorrowConditions.tempF;
-      const tempC = fahrenheitToCelsius(tempF);
-      setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
-      applyResults(tempF, tomorrowConditions);
-    } else if (mode === "current" && weatherConditions) {
-      const tempF = weatherConditions.tempF;
-      const tempC = fahrenheitToCelsius(tempF);
-      setCurrentTemp({ f: Math.round(tempF), c: Math.round(tempC) });
-      applyResults(tempF, weatherConditions);
-    }
-  }
-
   function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setWeatherConditions(null);
-    setTomorrowConditions(null);
-    setTomorrowTempLow(null);
-    setForecastMode("current");
+    setForecastDays([]);
+    setSelectedDayIndex(0);
 
     const value = parseFloat(tempInput);
     if (isNaN(value)) {
@@ -534,39 +525,26 @@ export default function WaxRecommender() {
         </div>
       )}
 
-      {/* Forecast mode toggle + Weather Widget — below recommendation */}
-      {weatherConditions && (
-        <>
-          {tomorrowConditions && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => switchForecastMode("current")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
-                  forecastMode === "current"
-                    ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-                }`}
-              >
-                Current Conditions
-              </button>
-              <button
-                onClick={() => switchForecastMode("tomorrow")}
-                className={`flex-1 py-3 sm:py-2.5 px-4 rounded-2xl text-sm font-medium transition-all min-h-[44px] ${
-                  forecastMode === "tomorrow"
-                    ? "bg-mf-blue text-white ring-2 ring-mf-blue/30 shadow-lg shadow-mf-blue/10"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 active:bg-white/15"
-                }`}
-              >
-                Tomorrow's Forecast
-              </button>
-            </div>
-          )}
-          <WeatherWidget
-            conditions={forecastMode === "tomorrow" && tomorrowConditions ? tomorrowConditions : weatherConditions}
-            mode={forecastMode}
-            tempLow={forecastMode === "tomorrow" ? tomorrowTempLow ?? undefined : undefined}
+      {/* 3-Day Forecast + Weather Widget */}
+      {forecastDays.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider px-1">
+            3-Day Forecast
+          </h2>
+          <ForecastCards
+            days={forecastDays}
+            selectedIndex={selectedDayIndex}
+            onSelect={setSelectedDayIndex}
           />
-        </>
+        </div>
+      )}
+
+      {weatherConditions && (
+        <WeatherWidget
+          conditions={forecastDays[selectedDayIndex]?.conditions ?? weatherConditions}
+          dayLabel={forecastDays[selectedDayIndex]?.dayLabel ?? "Today"}
+          tempLow={forecastDays[selectedDayIndex]?.tempLowF}
+        />
       )}
 
     </div>

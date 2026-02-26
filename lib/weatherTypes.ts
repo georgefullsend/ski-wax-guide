@@ -1,3 +1,21 @@
+import type { WaxRecommendation } from "./waxData";
+
+export interface ForecastDay {
+  date: string;
+  dayLabel: string;
+  conditions: WeatherConditions;
+  tempHighF: number;
+  tempLowF: number;
+  waxRecommendation: WaxRecommendation;
+}
+
+export function getDayLabel(dateStr: string, index: number): string {
+  if (index === 0) return "Today";
+  if (index === 1) return "Tomorrow";
+  const date = new Date(dateStr + "T12:00:00");
+  return date.toLocaleDateString("en-US", { weekday: "short" });
+}
+
 export interface WeatherConditions {
   tempF: number;
   tempC: number;

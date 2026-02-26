@@ -11,12 +11,12 @@ import { fahrenheitToCelsius } from "@/lib/waxData";
 
 interface WeatherWidgetProps {
   conditions: WeatherConditions;
-  mode?: "current" | "tomorrow";
+  dayLabel?: string;
   tempLow?: number;
 }
 
-export default function WeatherWidget({ conditions, mode = "current", tempLow }: WeatherWidgetProps) {
-  const isTomorrow = mode === "tomorrow";
+export default function WeatherWidget({ conditions, dayLabel = "Today", tempLow }: WeatherWidgetProps) {
+  const isForecast = dayLabel !== "Today";
   const effectiveTempF = Math.round(calcEffectiveTemp(conditions));
   const effectiveTempC = Math.round(fahrenheitToCelsius(effectiveTempF));
   const explanation = getEffectiveTempExplanation(conditions);
@@ -28,7 +28,7 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-white/[0.12] space-y-3 sm:space-y-4 liquid-card card-hover">
       <h2 className="text-base sm:text-lg font-semibold text-white">
-        {isTomorrow ? "Tomorrow's Forecast" : "Current Conditions"}
+        {isForecast ? `${dayLabel}'s Forecast` : "Current Conditions"}
       </h2>
 
       {/* Main condition row */}
@@ -37,7 +37,7 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
           <span className="text-2xl sm:text-3xl">{icon}</span>
           <span className="text-white font-medium text-sm sm:text-base">{label}</span>
         </div>
-        {isTomorrow && tempLow != null ? (
+        {isForecast && tempLow != null ? (
           <div className="text-right">
             <span className="text-xl sm:text-2xl font-bold text-white">
               {Math.round(conditions.tempF)}°F
@@ -68,11 +68,11 @@ export default function WeatherWidget({ conditions, mode = "current", tempLow }:
         </div>
         <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
           <span className="text-white/50 text-xs sm:text-sm">☁️ Cloud: </span>
-          <span className="text-white/90 text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.cloudCover}%`}</span>
+          <span className="text-white/90 text-xs sm:text-sm">{isForecast ? "—" : `${conditions.cloudCover}%`}</span>
         </div>
         <div className="bg-white/5 rounded-xl px-2.5 sm:px-3 py-2 transition-colors duration-150 hover:bg-white/10">
           <span className="text-white/50 text-xs sm:text-sm">💧 Humid: </span>
-          <span className="text-white/90 text-xs sm:text-sm">{isTomorrow ? "—" : `${conditions.humidity}%`}</span>
+          <span className="text-white/90 text-xs sm:text-sm">{isForecast ? "—" : `${conditions.humidity}%`}</span>
         </div>
       </div>
 
