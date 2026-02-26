@@ -21,17 +21,17 @@ export default function ForecastCards({ days, selectedIndex, onSelect }: Forecas
           }`}
         >
           <span className="text-white/60 text-xs font-medium">{day.dayLabel}</span>
-          <span className="text-2xl">{getWeatherIcon(day.conditions.weatherCode, true)}</span>
-          <span className="text-white text-sm font-semibold">
-            {day.tempHighF}° / {day.tempLowF}°
-          </span>
           <div className="flex items-center gap-1.5">
             <span
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              className="w-3.5 h-3.5 rounded-sm flex-shrink-0"
               style={{ backgroundColor: day.waxRecommendation.colorHex }}
             />
             <span className="text-white/70 text-xs">{day.waxRecommendation.color}</span>
           </div>
+          <span className="text-2xl">{getWeatherIcon(day.conditions.weatherCode, true)}</span>
+          <span className="text-white text-sm font-semibold">
+            {day.tempHighF}° / {day.tempLowF}°
+          </span>
         </button>
       ))}
     </div>
