@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ForecastDay } from "@/lib/weatherTypes";
 import { getWeatherIcon } from "@/lib/weatherTypes";
 
@@ -7,7 +8,7 @@ interface ForecastCardsProps {
   onSelect: (index: number) => void;
 }
 
-export default function ForecastCards({ days, selectedIndex, onSelect }: ForecastCardsProps) {
+export default memo(function ForecastCards({ days, selectedIndex, onSelect }: ForecastCardsProps) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {days.map((day, i) => (
@@ -36,4 +37,4 @@ export default function ForecastCards({ days, selectedIndex, onSelect }: Forecas
       ))}
     </div>
   );
-}
+});

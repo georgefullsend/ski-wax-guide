@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   getWaxRecommendation,
   celsiusToFahrenheit,
@@ -254,6 +254,20 @@ export default function WaxRecommender() {
     [filteredResorts]
   );
 
+  const resortsByRegion = useMemo(() => {
+    const map = new Map<string, SkiResort[]>();
+    for (const r of filteredResorts) {
+      const list = map.get(r.region);
+      if (list) list.push(r);
+      else map.set(r.region, [r]);
+    }
+    return map;
+  }, [filteredResorts]);
+
+  const handleDaySelect = useCallback((i: number) => {
+    setSelectedDayIndex(i);
+  }, []);
+
   return (
     <div className="w-full max-w-xl mx-auto space-y-4 sm:space-y-6">
 
@@ -362,9 +376,7 @@ export default function WaxRecommender() {
                           <div className="px-4 py-2 text-xs font-semibold text-mf-blue/70 uppercase tracking-wider sticky top-0 bg-slate-800/95">
                             {region}
                           </div>
-                          {filteredResorts
-                            .filter((r) => r.region === region)
-                            .map((resort) => (
+                          {(resortsByRegion.get(region) ?? []).map((resort) => (
                               <div
                                 key={resort.name}
                                 className="flex items-center hover:bg-white/10 active:bg-white/15 transition-colors"
@@ -581,7 +593,7 @@ export default function WaxRecommender() {
               <ForecastCards
                 days={forecastDays}
                 selectedIndex={selectedDayIndex}
-                onSelect={setSelectedDayIndex}
+                onSelect={handleDaySelect}
               />
               <WeatherWidget
                 conditions={forecastDays[selectedDayIndex]?.conditions ?? weatherConditions}

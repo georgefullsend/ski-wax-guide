@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   type WeatherConditions,
   getWeatherLabel,
@@ -15,7 +16,7 @@ interface WeatherWidgetProps {
   tempLow?: number;
 }
 
-export default function WeatherWidget({ conditions, dayLabel = "Today", tempLow }: WeatherWidgetProps) {
+export default memo(function WeatherWidget({ conditions, dayLabel = "Today", tempLow }: WeatherWidgetProps) {
   const isForecast = dayLabel !== "Today";
   const effectiveTempF = Math.round(calcEffectiveTemp(conditions));
   const effectiveTempC = Math.round(fahrenheitToCelsius(effectiveTempF));
@@ -90,4 +91,4 @@ export default function WeatherWidget({ conditions, dayLabel = "Today", tempLow 
       </div>
     </div>
   );
-}
+});
